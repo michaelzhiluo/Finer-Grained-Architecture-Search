@@ -15,6 +15,8 @@ https://arxiv.org/abs/1803.03635
             -Take the pruned network and reinitialize the remaining weights to w0
     - Larger networks have a larger combination of "winning tickets" (subnetworks that have a good combination during 
     initialization w0 that result in high accuracy), hence the idea of pruning
+    -When randomly reinitialized or rearranged, winning tickets perform far worse than the original network, meaning neither structure nor
+    initialization alone is responsible for a winning ticket’s success.
     - how do they parameterize the pruned network? do they zero out the weights?
     
 https://arxiv.org/abs/1806.09055
