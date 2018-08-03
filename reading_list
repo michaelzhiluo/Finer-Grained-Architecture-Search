@@ -4,7 +4,18 @@ https://arxiv.org/abs/1502.03492
 https://arxiv.org/abs/1602.02355
 https://arxiv.org/abs/1608.06993
 https://arxiv.org/abs/1711.05611
+
+Winning Ticket Hypothesis
 https://arxiv.org/abs/1803.03635
+    - Algorithm:
+        -Initialize Network with weights, w0
+        -Loop:
+            -Train till convergence
+            -Prune smallest weights
+            -Take the pruned network and reinitialize the remaining weights to w0
+    - Larger networks have a larger combination of "winning tickets" (subnetworks that have a good combination during 
+    initialization w0 that result in high accuracy), hence the idea of pruning
     - how do they parameterize the pruned network? do they zero out the weights?
+    
 https://arxiv.org/abs/1806.09055
 https://arxiv.org/abs/1807.08556
