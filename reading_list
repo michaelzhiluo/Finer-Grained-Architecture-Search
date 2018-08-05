@@ -1,6 +1,16 @@
 7 papers a week
 
+Gradient-based Hyperparameter Optimization through Reversible Learning
 https://arxiv.org/abs/1502.03492
+    -Most papers that perform gradient based hyperparmaeter optimization stores all the weights w1, ... w_t to find
+    gradient for hyperparameters at time step 1
+    -This paper finds a way via momentum descent to find gradients w.r.t hyperparemters in O(T) time with constant memory proportional
+    to number of weights, not W*T. 
+    -Lots of cool applications in the paper (you can treat initialized weights as a hyperparameter!)
+    -CON: to improve hyperparameters, you gotta do a bit of training than go from time T to time 1 to obtain gradient for hyperparameters 
+    at that timestep
+    -Weightsharing? Between interations of meta improvements?
+
 https://arxiv.org/abs/1602.02355
 https://arxiv.org/abs/1608.06993
 https://arxiv.org/abs/1711.05611
