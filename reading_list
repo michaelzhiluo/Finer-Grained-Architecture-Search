@@ -43,5 +43,7 @@ https://arxiv.org/abs/1806.09055
         -For each interation of training over weights w, update weights over training set, then update alpha over validation set
             -Different than finding optimal w*, then updating alpha to alpha', then finding optimal w**, etc.
         -Another caveat is that they choose the largest alpha as the only connection between nodes after training
-        
+
+Stackable NN Modules
 https://arxiv.org/abs/1807.08556
+-Don't see the weight sharing in this example
