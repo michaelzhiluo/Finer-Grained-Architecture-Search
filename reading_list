@@ -18,6 +18,30 @@ https://arxiv.org/abs/1803.03635
     -When randomly reinitialized or rearranged, winning tickets perform far worse than the original network, meaning neither structure nor
     initialization alone is responsible for a winning ticket’s success.
     - how do they parameterize the pruned network? do they zero out the weights?
-    
+
+DART Architecture Search
 https://arxiv.org/abs/1806.09055
+    -Optimizes based on cell, not entire network (convolutional or recurrent cell like LSTM or GRU)
+    -How Their Cell model works
+        -Imagine the cell as a dag with nodes
+            -2 nodes for input (from previous 2 convolutional layers) and 1 node for output
+            -Cell also contains n intermediary nodes, x1, x2, x3, .... xn
+            -The edge connecting between two nodes is a mathematical operation (conv, zero, etc)
+                -M mathematical operations (could be anything wtih trainable weights)
+            -There are LOTS of edges
+                -Both input nodes are connected to x1, ... xn
+                -All intermediary nodes are connected to output node
+                -For all i<j, node x_i connects to x_j
+                -Between any two nodes with a valid connection, there are M edges, each of which is a mathematical operation
+                    -IMPORTANT: The output of the M edges is a weighted softmaxed sum of all M mathematical operations
+                        -Adds another set of weights, alpha_(i,j), to represent how much each of those M mathemtical operations 
+                        should be weighted
+    -This becomes a cool dual optimization problem:
+        -Given a fixed alpha_(i,j), optimize weights over training set
+        -Given fixed weights, optimize alpha over validation set
+    -The above optimiztion problem is expensive, hence the DART algorithm:
+        -For each interation of training over weights w, update weights over training set, then update alpha over validation set
+            -Different than finding optimal w*, then updating alpha to alpha', then finding optimal w**, etc.
+        -Another caveat is that they choose the largest alpha as the only connection between nodes after training
+        
 https://arxiv.org/abs/1807.08556
