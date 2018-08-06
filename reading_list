@@ -11,7 +11,12 @@ https://arxiv.org/abs/1502.03492
     at that timestep
     -Weightsharing? Between interations of meta improvements?
 
+Hyperparameter optimization with approximate gradient
 https://arxiv.org/abs/1602.02355
+    -Pretty sure DART's main inspiration was off this paper, the algorithms are very very similar
+    -Same idea where you hyperparameter and parameter updating are done in a bi-level optimization like in DART
+
+
 https://arxiv.org/abs/1608.06993
 https://arxiv.org/abs/1711.05611
 
