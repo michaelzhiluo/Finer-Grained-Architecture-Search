@@ -12,6 +12,12 @@ https://arxiv.org/pdf/1703.03400.pdf
 Neural Module Networks
 https://arxiv.org/pdf/1511.02799.pdf
 
+Meta-learning Shared Hierarchies
+https://openreview.net/pdf?id=SyX0IeWAW
+
+Meta-Learning Evolutionary Artificial Neural Networks
+https://arxiv.org/ftp/cs/papers/0405/0405024.pdf
+
 Gradient-based Hyperparameter Optimization through Reversible Learning
 https://arxiv.org/abs/1502.03492
     -Most papers that perform gradient based hyperparmaeter optimization stores all the weights w1, ... w_t to find
