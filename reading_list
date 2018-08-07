@@ -1,5 +1,17 @@
 7 papers a week
 
+Soft Weight Sharing for NN compression
+https://arxiv.org/pdf/1702.04008.pdf
+
+Meta Networks
+https://arxiv.org/pdf/1703.00837.pdf
+
+MAML
+https://arxiv.org/pdf/1703.03400.pdf
+
+Neural Module Networks
+https://arxiv.org/pdf/1511.02799.pdf
+
 Gradient-based Hyperparameter Optimization through Reversible Learning
 https://arxiv.org/abs/1502.03492
     -Most papers that perform gradient based hyperparmaeter optimization stores all the weights w1, ... w_t to find
