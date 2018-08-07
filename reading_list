@@ -1,5 +1,8 @@
 7 papers a week
 
+Learning Structured Sparsity in Deep Neural Networks
+https://arxiv.org/abs/1608.03665
+
 Soft Weight Sharing for NN compression
 https://arxiv.org/pdf/1702.04008.pdf
 
@@ -8,9 +11,6 @@ https://arxiv.org/pdf/1703.00837.pdf
 
 MAML
 https://arxiv.org/pdf/1703.03400.pdf
-
-Neural Module Networks
-https://arxiv.org/pdf/1511.02799.pdf
 
 Meta-learning Shared Hierarchies
 https://openreview.net/pdf?id=SyX0IeWAW
@@ -79,6 +79,11 @@ https://arxiv.org/abs/1806.09055
         -For each interation of training over weights w, update weights over training set, then update alpha over validation set
             -Different than finding optimal w*, then updating alpha to alpha', then finding optimal w**, etc.
         -Another caveat is that they choose the largest alpha as the only connection between nodes after training
+
+
+Neural Module Networks
+https://arxiv.org/pdf/1511.02799.pdf
+-Not really weight sharing going on here, unless we interpret modularization as a form of weight sharing
 
 Stackable NN Modules
 https://arxiv.org/abs/1807.08556
