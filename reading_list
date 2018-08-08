@@ -11,6 +11,21 @@ https://arxiv.org/abs/1608.03665
 
 Soft Weight Sharing for NN compression
 https://arxiv.org/pdf/1702.04008.pdf
+    -Use the soft weight-sharing idea of Nowlan & Hinton (1992) for NN compression.
+    -Motivation: Learn a mixture of Gaussians (MoG) prior to encode parameters.
+    -Idea: "Compress" weights to K clusters. Works if weights concentrate closely around cluster means.
+    -Algorithm: 
+        -Take a pretrained network. Initialize a MoG w/ diagonal covariances "prior" over the weights.
+        -Retrain model with joint log-likelihood (Eq. 7).
+        -(Optional: Merge MoG components as necessary using a KL. Easy because component likelihoods are Gaussian!)
+        -Quantize by setting each weight to the mean of the component with highest responsibility.
+    -Results:
+        -Decent for LeNet on MNIST. No baseline for (wide) ResNet.
+        -Authors state difficulty with VGG:
+            -"In experiences with VGG we were able to prune 93% of the 
+             weights without loss of accuracy, however, the quantization step resulted in significant loss of 
+             accuracy. We think this is due to the network not having convergened."
+    
 
 Meta Networks
 https://arxiv.org/pdf/1703.00837.pdf
@@ -33,7 +48,7 @@ https://arxiv.org/abs/1502.03492
     gradient for hyperparameters at time step 1
     -This paper finds a way via momentum descent to find gradients w.r.t hyperparemters in O(T) time with constant memory proportional
     to number of weights, not W*T. 
-    -Lots of cool applications in the paper (you can treat initialized weights as a hyperparameter!)
+    -Lots of cool applications in the paper (you can treat initialized weights as a hyperparameter! (used later in MAML))
     -CON: to improve hyperparameters, you gotta do a bit of training than go from time T to time 1 to obtain gradient for hyperparameters 
     at that timestep
     -Weightsharing? Between interations of meta improvements?
@@ -81,10 +96,13 @@ https://arxiv.org/abs/1806.09055
     -This becomes a cool dual optimization problem:
         -Given a fixed alpha_(i,j), optimize weights over training set
         -Given fixed weights, optimize alpha over validation set
-    -The above optimiztion problem is expensive, hence the DART algorithm:
+            -Seems like, since this is no longer the setting of few-shot learning, we should just call this batches 1 & 2!
+    -The above optimization problem is expensive, hence the DART algorithm:
         -For each interation of training over weights w, update weights over training set, then update alpha over validation set
             -Different than finding optimal w*, then updating alpha to alpha', then finding optimal w**, etc.
         -Another caveat is that they choose the largest alpha as the only connection between nodes after training
+            -ie., this is how they go from the relaxed problem to the original setting of a single architecture
+            -Q: is this the best way to relax the architecture search problem?
 
 
 Neural Module Networks
