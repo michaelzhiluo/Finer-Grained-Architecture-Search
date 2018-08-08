@@ -76,6 +76,18 @@ https://arxiv.org/abs/1803.03635
     initialization alone is responsible for a winning ticket’s success.
     - how do they parameterize the pruned network? do they zero out the weights?
 
+On the importance of single directions for generalization
+https://arxiv.org/abs/1803.06959
+    -Selectively ablated neurons may harm classification performance.
+    -Can obtain similar results by replacing selectivity by mutual information.
+
+Understanding Individual Neuron Importance Using Information Theory
+https://arxiv.org/abs/1804.06679
+    -Pruning techniques based on importance measures for individual neurons should 
+        1) be applied layer-wise rather than on the NN as a whole
+        2) potentially benefit by using different importance measures in different layers
+    -Retraining after pruning can be replaced by a small surgery step
+
 DART Architecture Search
 https://arxiv.org/abs/1806.09055
     -Optimizes based on cell, not entire network (convolutional or recurrent cell like LSTM or GRU)
