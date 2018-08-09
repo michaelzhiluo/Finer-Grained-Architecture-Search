@@ -15,7 +15,7 @@ https://arxiv.org/pdf/1702.04008.pdf
     -Motivation: Learn a mixture of Gaussians (MoG) prior to encode parameters.
     -Idea: "Compress" weights to K clusters. Works if weights concentrate closely around cluster means.
     -Algorithm: 
-        -Take a pretrained network. Initialize a MoG w/ diagonal covariances "prior" over the weights.
+        -Take a pretrained network. Initialize a MoG w/ diagonal covariances as a "prior" over the weights.
         -Retrain model with joint log-likelihood (Eq. 7).
         -(Optional: Merge MoG components as necessary using a KL. Easy because component likelihoods are Gaussian!)
         -Quantize by setting each weight to the mean of the component with highest responsibility.
@@ -26,8 +26,15 @@ https://arxiv.org/pdf/1702.04008.pdf
              weights without loss of accuracy, however, the quantization step resulted in significant loss of 
              accuracy. We think this is due to the network not having convergened."
              
+Variational Dropout Sparsifies Deep Neural Networks
+https://arxiv.org/abs/1701.05369
+             
 VARIATIONAL NETWORK QUANTIZATION
 https://openreview.net/forum?id=ry-TW-WAb
+     -Idea: Learn dropout noise levels per weight and prune weights with large dropout noise; 
+     -Motivation: Interpret dropout training as variational inference of an approximate weight-posterior
+      under a sparsity-inducing prior.
+     -no block-wise sparsification?
      -SotA in quantization?
 
 Meta Networks
