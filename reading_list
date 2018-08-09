@@ -25,7 +25,10 @@ https://arxiv.org/pdf/1702.04008.pdf
             -"In experiences with VGG we were able to prune 93% of the 
              weights without loss of accuracy, however, the quantization step resulted in significant loss of 
              accuracy. We think this is due to the network not having convergened."
-    
+             
+VARIATIONAL NETWORK QUANTIZATION
+https://openreview.net/forum?id=ry-TW-WAb
+     -SotA in quantization?
 
 Meta Networks
 https://arxiv.org/pdf/1703.00837.pdf
