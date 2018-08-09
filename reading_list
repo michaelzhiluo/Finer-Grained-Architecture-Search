@@ -37,6 +37,18 @@ https://openreview.net/forum?id=ry-TW-WAb
      -no block-wise sparsification?
      -SotA in quantization?
 
+Learning Sparse Neural Networks through L_0 Regularization
+https://openreview.net/forum?id=H1Y8hhg0b
+    -AIC and BIC, well-known model selection criteria, are special cases of $L_0$ regularization.
+    -Idea: 
+        -Can smooth the L0 regularized objective in a way that can make it differentiable
+        -Allows for efficient gradient based optimization, without needing extra terms to make learning stable
+    -Implementation:
+        -Optimize a continuous surrogate for L_0 norm via simple modifications of the binary concrete relaxation 
+         with additional stretching and hard-sigmoid transformation steps.
+        -Allows for conditional computation, since it permits weight values of exactly zero.
+        -Also allows structured penalties, i.e. removing either entire convolutional feature maps or entire hidden units. 
+
 Meta Networks
 https://arxiv.org/pdf/1703.00837.pdf
 
