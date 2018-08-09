@@ -35,6 +35,12 @@ https://arxiv.org/pdf/1703.00837.pdf
 
 MAML
 https://arxiv.org/pdf/1703.03400.pdf
+    -Really cool paper that actually works! (really impressive results esp sinusoidal results) Chelsea Finn is god
+    -Essentially have a model over a distirubtion of tasks P(f_theta)
+        -Perform gradietn descent over each task T_i, to obtain theta_i'
+        -Update theta with the averaged gradients of loss function for each theta_i'
+        -Visually, think of each theta_i' as each task's way of pulling theta in that direction
+        -Having the theta to go to the middle of all the "pulling" for all the theta_i's will theoretically yield quickest learning
 
 Meta-learning Shared Hierarchies
 https://openreview.net/pdf?id=SyX0IeWAW
