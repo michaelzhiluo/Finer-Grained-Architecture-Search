@@ -10,7 +10,7 @@ Learning Structured Sparsity in Deep Neural Networks
 https://arxiv.org/abs/1608.03665
 
 Soft Weight Sharing for NN compression
-https://arxiv.org/pdf/1702.04008.pdf
+https://arxiv.org/abs/1702.04008
     -Use the soft weight-sharing idea of Nowlan & Hinton (1992) for NN compression.
     -Motivation: Learn a mixture of Gaussians (MoG) prior to encode parameters.
     -Idea: "Compress" weights to K clusters. Works if weights concentrate closely around cluster means.
@@ -34,12 +34,16 @@ https://openreview.net/forum?id=ry-TW-WAb
      -Idea: Learn dropout noise levels per weight and prune weights with large dropout noise; 
      -Motivation: Interpret dropout training as variational inference of an approximate weight-posterior
       under a sparsity-inducing prior.
-     -no block-wise sparsification?
+     -Variational posterior approximation and training procedure is similar to Kingma et al. (2015) 
+      and Molchanov et al. (2017) with the crucial difference of using a quantizing prior that 
+      drives weights towards the target values for quantization.
      -SotA in quantization?
 
 Learning Sparse Neural Networks through L_0 Regularization
 https://openreview.net/forum?id=H1Y8hhg0b
-    -AIC and BIC, well-known model selection criteria, are special cases of $L_0$ regularization.
+    -Motivations:
+        -AIC and BIC, well-known model selection criteria, are special cases of $L_0$ regularization.
+        -The log-uniform prior can be seen as a continuous relaxation of the spike-and-slab prior.
     -Idea: 
         -Can smooth the L0 regularized objective in a way that can make it differentiable
         -Allows for efficient gradient based optimization, without needing extra terms to make learning stable
@@ -104,6 +108,7 @@ https://arxiv.org/abs/1803.03635
     -When randomly reinitialized or rearranged, winning tickets perform far worse than the original network, meaning neither structure nor
     initialization alone is responsible for a winning ticket’s success.
     - how do they parameterize the pruned network? do they zero out the weights?
+    -A.1: iterative pruning works!! Can we frame this as a bilevel optimization problem?
 
 On the importance of single directions for generalization
 https://arxiv.org/abs/1803.06959
