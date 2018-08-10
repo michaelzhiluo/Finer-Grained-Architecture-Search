@@ -150,6 +150,16 @@ https://arxiv.org/abs/1806.09055
             -ie., this is how they go from the relaxed problem to the original setting of a single architecture
             -Q: is this the best way to relax the architecture search problem?
 
+Neural Processes
+https://arxiv.org/abs/1807.02033
+    - Variational inference (VI) for modelling distributions over functions.
+    - Generative model (from http://kasparmartens.rbind.io/post/np/):
+        - First, the context points ( x c , y c ) are mapped through a NN h to obtain a latent representation r c . 
+        - Then, the vectors r c are aggregated (in practice: averaged) to obtain a single value r (which has the same dimensionality as every r c ).
+        - This r is used to parametrise the distribution of z , i.e. p ( z | x 1 : C , y 1 : C ) = N ( μ z ( r ) , σ 2 z ( r ) ) 
+        - Finally, to obtain a prediction at a target x ∗ t , we sample z and concatenate this with x ∗ t , and map ( z , x ∗ t ) through a NN g 
+          to obtain a sample from the predictive distribution of y ∗ t
+
 Interpreting Deep Visual Representations via Network Dissection
 https://arxiv.org/abs/1711.05611
 -Not really weight sharing
