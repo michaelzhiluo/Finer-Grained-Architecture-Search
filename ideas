@@ -1,0 +1,10 @@
+Idea #1: learning the number of steps in the inner loop of gradient descent
+    - can use reparameterization gradients to treat the number of steps as a latent variable!
+    - what is the appropriate distribution to use as a model here? Poisson?
+    - need to read the literature on reparameterization gradients:
+        - The Generalized Reparameterization Gradient (NIPS 2016) https://arxiv.org/abs/1610.02287
+        - Pathwise Derivatives Beyond the Reparameterization Trick (ICML 2018) https://arxiv.org/abs/1806.01851
+        - Implicit Reparameterization Gradients (NIPS 2018) https://arxiv.org/abs/1805.08498
+        - Latent Alignment and Variational Attention (NIPS 2018) https://arxiv.org/abs/1807.03756
+    - can be incorporated into a larger procedure via stochastic variational EM
+        - Variational algorithms for approximate Bayesian inference https://cse.buffalo.edu/faculty/mbeal/papers/beal03.pdf
