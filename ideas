@@ -8,3 +8,8 @@ Idea #1: learning the number of steps in the inner loop of gradient descent
         - Latent Alignment and Variational Attention (NIPS 2018) https://arxiv.org/abs/1807.03756
     - can be incorporated into a larger procedure via stochastic variational EM
         - Variational algorithms for approximate Bayesian inference https://cse.buffalo.edu/faculty/mbeal/papers/beal03.pdf
+    - will this allow us to avoid the short-horizon bias? (https://arxiv.org/abs/1803.02021)
+
+Idea #2: gradient-based meta-learning for optimization for learning neural network architecture
+    - DARTS is too restrictive -- only searches over a small set of candidate nodes
+    - can we parameterize invariances? (e.g., the translational invariance encoded into a convolutional network)
