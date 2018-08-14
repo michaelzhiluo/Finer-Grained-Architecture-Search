@@ -1,4 +1,30 @@
-7 papers a week
+7 papers a week >:)
+
+Discrete-Valued Neural Networks Using Variational Inference
+https://openreview.net/forum?id=r1h2DllAW
+    -Rejected from ICLR btw, so quality may be questionable
+
+XNOR-Net: ImageNet Classification Using Binary Convolutional Neural Networks
+https://arxiv.org/abs/1603.05279
+
+Representing inferential uncertainty in deep neural networks through sampling 
+https://openreview.net/pdf?id=HJ1JBJ5gl
+
+Bayesian Compression for Deep Learning
+https://papers.nips.cc/paper/6921-bayesian-compression-for-deep-learning.pdf
+
+Gaussian Process Neurons
+https://openreview.net/pdf?id=By-IifZRW
+    -Rejected from ICLR, but they say its a very cool idea with no experiments hence rejection
+
+Structured Exploration via Hierarchical Variational Policy Networks
+https://openreview.net/forum?id=HyunpgbR-
+
+Variational Continual Learning
+https://openreview.net/forum?id=BkQqq0gRb
+
+Learning to Infer
+https://openreview.net/forum?id=B1Z3W-b0W
 
 Differentiable Neural Network Architecture Search
 https://openreview.net/pdf?id=BJ-MRKkwG
@@ -29,7 +55,7 @@ https://arxiv.org/abs/1702.04008
 Variational Dropout Sparsifies Deep Neural Networks
 https://arxiv.org/abs/1701.05369
              
-VARIATIONAL NETWORK QUANTIZATION
+Variational Network Quantization
 https://openreview.net/forum?id=ry-TW-WAb
      -Idea: Learn dropout noise levels per weight and prune weights with large dropout noise; 
      -Motivation: Interpret dropout training as variational inference of an approximate weight-posterior
@@ -159,6 +185,11 @@ https://arxiv.org/abs/1807.02033
         - This r is used to parametrise the distribution of z , i.e. p ( z | x 1 : C , y 1 : C ) = N ( μ z ( r ) , σ 2 z ( r ) ) 
         - Finally, to obtain a prediction at a target x ∗ t , we sample z and concatenate this with x ∗ t , and map ( z , x ∗ t ) through a NN g 
           to obtain a sample from the predictive distribution of y ∗ t
+
+
+
+--------------------------------------Unrelated Papers--------------------------------------
+
 
 Interpreting Deep Visual Representations via Network Dissection
 https://arxiv.org/abs/1711.05611
