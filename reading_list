@@ -93,12 +93,28 @@ https://arxiv.org/pdf/1703.03400.pdf
 
 Meta-learning Shared Hierarchies
 https://openreview.net/pdf?id=SyX0IeWAW
+    -phi - shared parameters between tasks
+	- K subpolicies in phi, phi_i
+    -theta - task specific parameters for a single task
+    -P_M, distribution of tasks
+    -For each task, for each task, there is a master policy theta (action space (1, 2...,K) that chooses among the K subpolicies
+    -Master policy chooses phi_i every N timesteps, phi_i is executed in between
+    -How to train?
+        -Sample task
+        -Reset theta
+        -Warmup Period
+            -train theta
+        -Joint Period
+            -train theta and phi
+        -Repeat forever
 
 Meta-Learning Evolutionary Artificial Neural Networks
 https://arxiv.org/ftp/cs/papers/0405/0405024.pdf
 
 Weight Uncertainty in Neural Networks
 https://arxiv.org/pdf/1505.05424.pdf
+    -Uses variational inference to find a posterior distribution of weights given data in a neural network 
+    -Uses monte carlo sampling to train ELBO to find optimal u, sigma for weight distribution
 
 Gradient-based Hyperparameter Optimization through Reversible Learning
 https://arxiv.org/abs/1502.03492
