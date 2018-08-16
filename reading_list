@@ -4,6 +4,13 @@ Discrete-Valued Neural Networks Using Variational Inference
 https://openreview.net/forum?id=r1h2DllAW
     -Rejected from ICLR btw, so quality may be questionable
 
+
+THE CONCRETE DISTRIBUTION:
+A CONTINUOUS RELAXATION OF
+DISCRETE RANDOM VARIABLES
+https://arxiv.org/pdf/1611.00712.pdf
+    -Potential use for hyperparameter optimization
+
 XNOR-Net: ImageNet Classification Using Binary Convolutional Neural Networks
 https://arxiv.org/abs/1603.05279
 
@@ -28,6 +35,8 @@ https://openreview.net/forum?id=B1Z3W-b0W
 
 Differentiable Neural Network Architecture Search
 https://openreview.net/pdf?id=BJ-MRKkwG
+	-Convert neural network architecture discrete hyperparameters into continuous ones
+	-Should focus on this paper albeit short, since workshop talk
 
 Simplifying Neural Networks by Soft Weight-sharing
 http://www.cs.toronto.edu/~hinton/absps/sunspots.pdf
@@ -205,7 +214,6 @@ https://arxiv.org/abs/1807.02033
 
 
 --------------------------------------Unrelated Papers--------------------------------------
-
 
 Interpreting Deep Visual Representations via Network Dissection
 https://arxiv.org/abs/1711.05611
