@@ -1,0 +1,7 @@
+Thursday, August 16th
+-think about weight sharing: 
+  -how can we setup the meta-learning problem so that we can learn an interesting weight-sharing structure?
+  -how can we adapt "soft weight-sharing" so that online pruning / collapsing is possible?
+  -how can we take insight from the Lottery Ticket Hypothesis, which accomplishes drastic pruning with little loss in accuracy?
+  -how can we take insight from L0 regularization for online pruning?
+-more papers!
