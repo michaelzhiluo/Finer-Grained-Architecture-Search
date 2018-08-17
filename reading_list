@@ -37,6 +37,7 @@ Differentiable Neural Network Architecture Search
 https://openreview.net/pdf?id=BJ-MRKkwG
 	-Convert neural network architecture discrete hyperparameters into continuous ones
 	-Should focus on this paper albeit short, since workshop talk
+	-What is the method???
 
 Simplifying Neural Networks by Soft Weight-sharing
 http://www.cs.toronto.edu/~hinton/absps/sunspots.pdf
