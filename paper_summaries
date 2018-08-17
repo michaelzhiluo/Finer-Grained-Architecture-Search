@@ -1,1 +1,174 @@
+Soft Weight Sharing for NN compression
+https://arxiv.org/abs/1702.04008
+    -Use the soft weight-sharing idea of Nowlan & Hinton (1992) for NN compression.
+    -Motivation: Learn a mixture of Gaussians (MoG) prior to encode parameters.
+    -Idea: "Compress" weights to K clusters. Works if weights concentrate closely around cluster means.
+    -Algorithm: 
+        -Take a pretrained network. Initialize a MoG w/ diagonal covariances as a "prior" over the weights.
+        -Retrain model with joint log-likelihood (Eq. 7).
+        -(Optional: Merge MoG components as necessary using a KL. Easy because component likelihoods are Gaussian!)
+        -Quantize by setting each weight to the mean of the component with highest responsibility.
+    -Results:
+        -Decent for LeNet on MNIST. No baseline for (wide) ResNet.
+        -Authors state difficulty with VGG:
+            -"In experiences with VGG we were able to prune 93% of the 
+             weights without loss of accuracy, however, the quantization step resulted in significant loss of 
+             accuracy. We think this is due to the network not having convergened."
+             
+             
+Variational Network Quantization
+https://openreview.net/forum?id=ry-TW-WAb
+     -Idea: Learn dropout noise levels per weight and prune weights with large dropout noise; 
+     -Motivation: Interpret dropout training as variational inference of an approximate weight-posterior
+      under a sparsity-inducing prior.
+     -Variational posterior approximation and training procedure is similar to Kingma et al. (2015) 
+      and Molchanov et al. (2017) with the crucial difference of using a quantizing prior that 
+      drives weights towards the target values for quantization.
+     -SotA in quantization?
 
+Learning Sparse Neural Networks through L_0 Regularization
+https://openreview.net/forum?id=H1Y8hhg0b
+    -Motivations:
+        -AIC and BIC, well-known model selection criteria, are special cases of $L_0$ regularization.
+        -The log-uniform prior can be seen as a continuous relaxation of the spike-and-slab prior.
+    -Idea: 
+        -Can smooth the L0 regularized objective in a way that can make it differentiable
+        -Allows for efficient gradient based optimization, without needing extra terms to make learning stable
+    -Implementation:
+        -Optimize a continuous surrogate for L_0 norm via simple modifications of the binary concrete relaxation 
+         with additional stretching and hard-sigmoid transformation steps.
+        -Allows for conditional computation, since it permits weight values of exactly zero.
+        -Also allows structured penalties, i.e. removing either entire convolutional feature maps or entire hidden units. 
+
+MAML
+https://arxiv.org/pdf/1703.03400.pdf
+    -Really cool paper that actually works! (really impressive results esp sinusoidal results) Chelsea Finn is god
+    -Essentially have a model over a distirubtion of tasks P(f_theta)
+        -Perform gradietn descent over each task T_i, to obtain theta_i'
+        -Update theta with the averaged gradients of loss function for each theta_i'
+        -Visually, think of each theta_i' as each task's way of pulling theta in that direction
+        -Having the theta to go to the middle of all the "pulling" for all the theta_i's will theoretically yield quickest learning
+
+Meta-learning Shared Hierarchies
+https://openreview.net/pdf?id=SyX0IeWAW
+    -phi - shared parameters between tasks
+	- K subpolicies in phi, phi_i
+    -theta - task specific parameters for a single task
+    -P_M, distribution of tasks
+    -For each task, for each task, there is a master policy theta (action space (1, 2...,K) that chooses among the K subpolicies
+    -Master policy chooses phi_i every N timesteps, phi_i is executed in between
+    -How to train?
+        -Sample task
+        -Reset theta
+        -Warmup Period
+            -train theta
+        -Joint Period
+            -train theta and phi
+        -Repeat forever
+
+Weight Uncertainty in Neural Networks
+https://arxiv.org/pdf/1505.05424.pdf
+    -Uses variational inference to find a posterior distribution of weights given data in a neural network 
+    -Uses monte carlo sampling to train ELBO to find optimal u, sigma for weight distribution
+
+Gradient-based Hyperparameter Optimization through Reversible Learning
+https://arxiv.org/abs/1502.03492
+    -Most papers that perform gradient based hyperparmaeter optimization stores all the weights w1, ... w_t to find
+    gradient for hyperparameters at time step 1
+    -This paper finds a way via momentum descent to find gradients w.r.t hyperparemters in O(T) time with constant memory proportional
+    to number of weights, not W*T. 
+    -Lots of cool applications in the paper (you can treat initialized weights as a hyperparameter! (used later in MAML))
+    -CON: to improve hyperparameters, you gotta do a bit of training than go from time T to time 1 to obtain gradient for hyperparameters 
+    at that timestep
+    -Weightsharing? Between interations of meta improvements?
+
+Hyperparameter optimization with approximate gradient
+https://arxiv.org/abs/1602.02355
+    -Pretty sure DART's main inspiration was off this paper, the algorithms are very very similar
+    -Same idea where you hyperparameter and parameter updating are done in a bi-level optimization like in DART
+
+Dense-CNN
+https://arxiv.org/abs/1608.06993
+-Concatenate previous layer to calculate new layer
+-not really weight sharing, but feature map sharing
+
+Winning Ticket Hypothesis
+https://arxiv.org/abs/1803.03635
+    - Algorithm:
+        -Initialize Network with weights, w0
+        -Loop:
+            -Train till convergence
+            -Prune smallest weights
+            -Take the pruned network and reinitialize the remaining weights to w0
+    - Larger networks have a larger combination of "winning tickets" (subnetworks that have a good combination during 
+    initialization w0 that result in high accuracy), hence the idea of pruning
+    -When randomly reinitialized or rearranged, winning tickets perform far worse than the original network, meaning neither structure nor
+    initialization alone is responsible for a winning ticket’s success.
+    - how do they parameterize the pruned network? do they zero out the weights?
+    -A.1: iterative pruning works!! Can we frame this as a bilevel optimization problem?
+
+On the importance of single directions for generalization
+https://arxiv.org/abs/1803.06959
+    -Selectively ablated neurons may harm classification performance.
+    -Can obtain similar results by replacing selectivity by mutual information.
+
+Understanding Individual Neuron Importance Using Information Theory
+https://arxiv.org/abs/1804.06679
+    -Pruning techniques based on importance measures for individual neurons should 
+        1) be applied layer-wise rather than on the NN as a whole
+        2) potentially benefit by using different importance measures in different layers
+    -Retraining after pruning can be replaced by a small surgery step
+
+DART Architecture Search
+https://arxiv.org/abs/1806.09055
+    -Optimizes based on cell, not entire network (convolutional or recurrent cell like LSTM or GRU)
+    -How Their Cell model works
+        -Imagine the cell as a dag with nodes
+            -2 nodes for input (from previous 2 convolutional layers) and 1 node for output
+            -Cell also contains n intermediary nodes, x1, x2, x3, .... xn
+            -The edge connecting between two nodes is a mathematical operation (conv, zero, etc)
+                -M mathematical operations (could be anything wtih trainable weights)
+            -There are LOTS of edges
+                -Both input nodes are connected to x1, ... xn
+                -All intermediary nodes are connected to output node
+                -For all i<j, node x_i connects to x_j
+                -Between any two nodes with a valid connection, there are M edges, each of which is a mathematical operation
+                    -IMPORTANT: The output of the M edges is a weighted softmaxed sum of all M mathematical operations
+                        -Adds another set of weights, alpha_(i,j), to represent how much each of those M mathemtical operations 
+                        should be weighted
+    -This becomes a cool dual optimization problem:
+        -Given a fixed alpha_(i,j), optimize weights over training set
+        -Given fixed weights, optimize alpha over validation set
+            -Seems like, since this is no longer the setting of few-shot learning, we should just call this batches 1 & 2!
+    -The above optimization problem is expensive, hence the DART algorithm:
+        -For each interation of training over weights w, update weights over training set, then update alpha over validation set
+            -Different than finding optimal w*, then updating alpha to alpha', then finding optimal w**, etc.
+        -Another caveat is that they choose the largest alpha as the only connection between nodes after training
+            -ie., this is how they go from the relaxed problem to the original setting of a single architecture
+            -Q: is this the best way to relax the architecture search problem?
+
+Neural Processes
+https://arxiv.org/abs/1807.02033
+    - Variational inference (VI) for modelling distributions over functions.
+    - Generative model (from http://kasparmartens.rbind.io/post/np/):
+        - First, the context points ( x c , y c ) are mapped through a NN h to obtain a latent representation r c . 
+        - Then, the vectors r c are aggregated (in practice: averaged) to obtain a single value r (which has the same dimensionality as every r c ).
+        - This r is used to parametrise the distribution of z , i.e. p ( z | x 1 : C , y 1 : C ) = N ( μ z ( r ) , σ 2 z ( r ) ) 
+        - Finally, to obtain a prediction at a target x ∗ t , we sample z and concatenate this with x ∗ t , and map ( z , x ∗ t ) through a NN g 
+          to obtain a sample from the predictive distribution of y ∗ t
+
+
+
+--------------------------------------Unrelated Papers--------------------------------------
+
+Interpreting Deep Visual Representations via Network Dissection
+https://arxiv.org/abs/1711.05611
+-Not really weight sharing
+
+Neural Module Networks
+https://arxiv.org/pdf/1511.02799.pdf
+-Not really weight sharing going on here, unless we interpret modularization as a form of weight sharing
+
+Stackable NN Modules
+https://arxiv.org/abs/1807.08556
+-Don't see the weight sharing in this example
