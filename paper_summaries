@@ -1,5 +1,37 @@
 Generative Adversarial Networks
 	-Potential Weight Sharing idea between generator and discrminator
+	-Generator G maps latent space z to fake image x'
+		-Maximize D(G(z)) (Maximize probably discriminator says fake image is real)
+	-Discriminator D maps G(z) = x' or x (ground truth) to real or not real
+		-Maximize E_p(x)[D(x)] + E_p(z)[1-D(x')]
+			-p(z) = p(x') btw
+			-Maximize Probability x is real and minimize probability x' is real
+	-Algorithm trains Discriminator for k iterations then Generator for 1 iteration
+		-Repeat
+		-Based off of minimax dual descent
+
+Variational Continual Learning
+	-Insipiration behind this paper is that neural networks forget a lot of prior stuff after learning
+	from a bunch of tasks
+	-You have T Datasets
+		-p(theta | D1, D2 .. DT) = (1/Z) p(theta| D1, D2 .. D_(T-1)* p(D_t|theta)
+		-Recursion!
+	-Where does Variational Inference come in?
+		-You have prior q_0(theta)
+		-Recrusively update q_t(theta) through this:
+			-q_t(theta) = argmin KL( q(theta) || (1/Z)q_(t-1)(theta)*p(D_t|theta))
+	-Introduces Coreset C_t, to contain previous information from previous t Datasets
+		-Update C_t+1 from C_t and D_t+1 (randomly choose k points from D_t+1 or using algo to do that)
+	-VCL Coreset Algorithm
+		-Essentially adds coreset to the variational recursion above
+		-A bit mathy, requires q*(theta), an approximation of posterior from data not in coreset and
+		q(theta), an approximatino of posterior from all data
+	-VCL Also used on deep discriminative and generative models
+	
+
+
+Generative Adversarial Networks
+	-Potential Weight Sharing idea between generator and discrminator
 		-Need to solidify idea first
 	-Generator G maps latent space z to fake image x'
 		-Maximize D(G(z)) (Maximize probably discriminator says fake image is real)
