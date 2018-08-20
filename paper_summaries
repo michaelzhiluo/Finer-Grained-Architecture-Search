@@ -1,3 +1,17 @@
+Generative Adversarial Networks
+	-Potential Weight Sharing idea between generator and discrminator
+		-Need to solidify idea first
+	-Generator G maps latent space z to fake image x'
+		-Maximize D(G(z)) (Maximize probably discriminator says fake image is real)
+	-Discriminator D maps G(z) = x' or x (ground truth) to real or not real
+		-Maximize E_p(x)[D(x)] + E_p(z)[1-D(x')]
+			-p(z) = p(x') btw
+			-Maximize Probability x is real and minimize probability x' is real
+	-Algorithm trains Discriminator for k iterations then Generator for 1 iteration
+		-Repeat
+		-Based off of minimax dual descent
+
+
 Soft Weight Sharing for NN compression
 https://arxiv.org/abs/1702.04008
     -Use the soft weight-sharing idea of Nowlan & Hinton (1992) for NN compression.
