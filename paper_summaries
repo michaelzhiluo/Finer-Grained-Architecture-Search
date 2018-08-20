@@ -1,3 +1,17 @@
+Meta-Learning Evolutional Neural Networks
+	-In this paper, we present MLEANN (Meta-Learning Evolutionary Artificial Neural Network), an automatic
+computational framework for the adaptive optimization of artificial neural networks wherein the neural network
+architecture, activation function, connection weights; learning algorithm and its parameters are adapted according to the
+problem
+	-Lowest level of evolutionary heirarchy: weights
+		-Basic eovlution algorithm you learn in 188
+	-Second lowest level of evolutionary hierarchy: activation function, architecture
+		-Constructive Desturction Aglorithms
+		-Connections between nodes, represented as 1 or 0
+		-Perform your evoluation algorithm for node 1, node 2, ...node n
+	-High level ofevolutionary hierarchy: Type of gradient update used (backpropr, or etc)
+		-Evolutionary algoriothm
+
 Generative Adversarial Networks
 	-Potential Weight Sharing idea between generator and discrminator
 	-Generator G maps latent space z to fake image x'
