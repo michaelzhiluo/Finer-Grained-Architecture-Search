@@ -14,9 +14,6 @@ https://arxiv.org/abs/1603.05279
 Representing inferential uncertainty in deep neural networks through sampling 
 https://openreview.net/pdf?id=HJ1JBJ5gl
 
-Bayesian Compression for Deep Learning
-https://papers.nips.cc/paper/6921-bayesian-compression-for-deep-learning.pdf
-
 Gaussian Process Neurons
 https://openreview.net/pdf?id=By-IifZRW
     -Rejected from ICLR, but they say its a very cool idea with no experiments hence rejection
@@ -32,9 +29,6 @@ https://openreview.net/pdf?id=BJ-MRKkwG
 	-Convert neural network architecture discrete hyperparameters into continuous ones
 	-Should focus on this paper albeit short, since workshop talk
 	-What is the method???
-
-Simplifying Neural Networks by Soft Weight-sharing
-http://www.cs.toronto.edu/~hinton/absps/sunspots.pdf
 
 Learning Structured Sparsity in Deep Neural Networks
 https://arxiv.org/abs/1608.03665
