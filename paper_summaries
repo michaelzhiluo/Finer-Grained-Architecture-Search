@@ -1,3 +1,10 @@
+Simplifying Neural Networks by Soft Weight-sharing
+http://www.cs.toronto.edu/~hinton/absps/sunspots.pdf
+	-People usually use L0, L1, or L2 loss to force weights to 0
+	-Add Multivariate guassian complexity term to loss function, use backprop to train mean, variance of guassian
+	as well as cluster weights
+	-The prior paper to Soft Weight Sharing for NN compression that Erin read
+
 Bayesian Compression for Deep Learning
 	-Prune large parts of networks through sparsity priors
 	-Use Variational Inference to find P(w|D), elbo strongly depends on prior
