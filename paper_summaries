@@ -1,3 +1,11 @@
+Bayesian Compression for Deep Learning
+	-Prune large parts of networks through sparsity priors
+	-Use Variational Inference to find P(w|D), elbo strongly depends on prior
+	-The prior they used is w ~ N(0, z^2), where z ~ from some distribution (some hierarchal bayes)
+		-The distribution they used were Half Cauchy and improper log uniform
+	-Perfrom Variational Inference on Q(w, z), sparisty pops up due to resulting "horseshoe"?
+	-Need your help @Erin Grant to understand the math, since I'm bad
+
 Meta-Learning Evolutional Neural Networks
 	-In this paper, we present MLEANN (Meta-Learning Evolutionary Artificial Neural Network), an automatic
 computational framework for the adaptive optimization of artificial neural networks wherein the neural network
