@@ -13,6 +13,16 @@ Idea #1: learning the number of steps in the inner loop of gradient descent
 Idea #2: gradient-based meta-learning for optimization for learning neural network architecture
     - DARTS is too restrictive -- only searches over a small set of candidate nodes
     - can we parameterize invariances? (e.g., the translational invariance encoded into a convolutional network)
+    -What is the gradient of invariances between convolution to fully connected
+    
+2a)
+    -Generalized Convolutions (with no invariances, but invariances are a subset of it):
+        -we have a set of N weights for each layer
+        -Input is Ix1, output is Ox1
+        -Define a connection as a triplet (I_i, W_j, O_k)
+            -At the end, sum all the connections
+        -MAximum of I*N*O conections 
+            -how to we learn those connections? And what type of connections parameterize invariance?
     
 Idea #3: Ways to do discrete and continuous hyperparmaeter optimization
     -Concrete Distribution for discrete hyperparemeters
