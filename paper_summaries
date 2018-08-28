@@ -1,3 +1,10 @@
+Efficient and Invariant Convolutional Neural Networks for Dense Prediction
+https://arxiv.org/pdf/1711.09064.pdf
+	-Rotate your kernel for rotational invariance, Flip your kernel for flip invariance
+	-Added all these different rotated/flipped kernels in yoru conv layer, combine all outputs of the kernels
+	by doing a maxout from Goodfellow's paper 
+
+
 THE CONCRETE DISTRIBUTION: A CONTINUOUS RELAXATION OF DISCRETE RANDOM VARIABLES
 https://arxiv.org/pdf/1611.00712.pdf
     -Discrete distribution defined as Discrete(alpha1, alpha2, ... alphan) aka unnormalized probabilities
