@@ -1,28 +1,5 @@
 7 papers a week >:)
 
-Discrete-Valued Neural Networks Using Variational Inference
-https://openreview.net/forum?id=r1h2DllAW
-    -Rejected from ICLR btw, so quality may be questionable
-
-THE CONCRETE DISTRIBUTION: A CONTINUOUS RELAXATION OF DISCRETE RANDOM VARIABLES
-https://arxiv.org/pdf/1611.00712.pdf
-    -Discrete distribution defined as Discrete(alpha1, alpha2, ... alphan) aka unnormalized probabilities
-    over n discrete values
-    	-Probabilites of selection for each of the n discrete values would be alpha_i/(sum of all alpha)
-	-Another way to look at this is to calculate
-		alpha_i + G_i, where G_i is sampled from a simple Gumbel distribution, and choose the maximum value, 
-		which will be your sampled value
-     -Concrete Random Variables extend this alternative view by generalizing taking the max(alpha_i + G_i) by adding
-     a LAMBDA, or the temperature variable, and performing a softmax over alpha_i + G_i. When lambda =0, you will get the discrete distribution
-     -Concrete Distribution has a distirubtion parameterized on alpha and lambda
-     -Properties of Concrete Distribution
-     	-You can reparemterize distirubtion (in stochastic nodes for back prop for example) with Gumbel
-	-You can round a concrete distribution to a discrete distirubtion by doing integration
-	-As lmabda ->0, the pdf is discrete
-	-Somwhat convex
-     -Any loss function that has E_some discrete distribution(something) can be relaxed into the continuous concrete distribution
-     
-
 XNOR-Net: ImageNet Classification Using Binary Convolutional Neural Networks
 https://arxiv.org/abs/1603.05279
 
@@ -44,29 +21,6 @@ https://openreview.net/pdf?id=BJ-MRKkwG
 	-Convert neural network architecture discrete hyperparameters into continuous ones
 	-Should focus on this paper albeit short, since workshop talk
 	-What is the method???
-
-Learning Structured Sparsity in Deep Neural Networks
-https://arxiv.org/abs/1608.03665
-	-Best paper I read yet; Simple yet powerful idea
-	-When you add regularization to NN, like L2, L1, some weights go to zero as we all learned in our intro ML classes
-	-Conv layer dimensions have four parameters: N (number of filters), C (channel depth), W, H 
-	-You can eliminate entire groups of weights if you do this:
-		- Group 1,2, ... G (G groups of weights)
-		-  Add this to your loss function:
-			-lambda_G * sum(1 to G){ || ith Group || )
-			- || ith group || is usually L2 norm for all the weights in the group
-	-Implications:
-		-Can eliminate entire layers if you set each group to be the weights of a layer
-		-Can obtain conv kernels of any shape if you, for a single layer, group together C, W, H for all N filters of that layer
-		-Most of all leave out important filters and channels if you group by channels and filters
-             
-Variational Dropout Sparsifies Deep Neural Networks
-https://arxiv.org/abs/1701.05369
-	-Dropout is typically a bernoulli variable * weights, but dropout can also be weights*normal(1, alpha)
-		-alpha = p/(1-p) for bernoulli(p), where p is dropout rate; p->1, alpha -> infinite = DROP that beat
-	-Variational infernence is used on the weights parameterized by N(theta_ij, alpha_ij) for each weight w_ij
-	-Prior for P(w) is improper log scale uniform
-	-Now you can train individual dropouts for each weight/node!
 
 Meta Networks
 https://arxiv.org/pdf/1703.00837.pdf
