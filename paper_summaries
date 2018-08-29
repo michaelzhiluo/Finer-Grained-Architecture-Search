@@ -1,3 +1,8 @@
+Quantifying Translation-Invariance in Convolutional Neural Networks
+http://cs231n.stanford.edu/reports/2016/pdfs/107_Report.pdf
+	-Deeper neural networks and larger filter sizes are more translationally invariant
+	-MOST OF ALL, training datset matters most (include translations in your dataset!)
+
 Efficient and Invariant Convolutional Neural Networks for Dense Prediction
 https://arxiv.org/pdf/1711.09064.pdf
 	-Rotate your kernel for rotational invariance, Flip your kernel for flip invariance
