@@ -1,3 +1,18 @@
+Permutation-equivariant neural networks applied to dynamics prediction
+https://arxiv.org/pdf/1612.04530.pdf
+	-
+
+Scale Invariant Convolutional Neural Network
+https://arxiv.org/abs/1411.6369
+	-Similar to the techniques used in most invariance papers: Add more kernels!
+	-Basically, you train one conv kernel for a specific scale and you add more kernels that you scale up or scale down to perform additional convs
+	-Concatenate all the feature vectors from the conv kernels of all scales
+
+Locally Scale-Invariant Convolutional Neural Networks
+	https://people.eecs.berkeley.edu/~kanazawa/papers/sicnn_workshop2014.pdf
+	-Form laplacian pyramid of scaled images form small to big, convovle the same kenrel around them
+	-Maxpool
+
 Rotation Invariance Neural Network
 https://arxiv.org/ftp/arxiv/papers/1706/1706.05534.pdf
 	-You have a 3D feature map
