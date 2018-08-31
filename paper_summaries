@@ -1,6 +1,6 @@
 Permutation-equivariant neural networks applied to dynamics prediction
 https://arxiv.org/pdf/1612.04530.pdf
-	-
+	-Utilizes idea that permutation invariance is via addition
 
 Scale Invariant Convolutional Neural Network
 https://arxiv.org/abs/1411.6369
