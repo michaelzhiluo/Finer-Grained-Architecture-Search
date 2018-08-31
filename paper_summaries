@@ -1,3 +1,11 @@
+Rotation Invariance Neural Network
+https://arxiv.org/ftp/arxiv/papers/1706/1706.05534.pdf
+	-You have a 3D feature map
+	-Bascially the kernel is the size of feature map in that channel
+	-In addition, when you convolve, you dont pad with 0 but have the kernel wrap around 
+	-YOU ADD A LOT OF KERNELS PER LAYER, duplicating each kernel n times for the n possible rotation sof image
+	-This paper kind of copies the "Efficient and Invariant CNN for Dnese Prediction", moving on
+
 Quantifying Translation-Invariance in Convolutional Neural Networks
 http://cs231n.stanford.edu/reports/2016/pdfs/107_Report.pdf
 	-Deeper neural networks and larger filter sizes are more translationally invariant
