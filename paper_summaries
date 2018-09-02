@@ -8,7 +8,11 @@ https://arxiv.org/pdf/1506.02025.pdf
 	
 Permutation-equivariant neural networks applied to dynamics prediction
 https://arxiv.org/pdf/1612.04530.pdf
-	-Utilizes idea that permutation invariance is via addition
+	-Utilizes idea that permutation invariance is via addition/pooling operation
+	-They add something called the permutation layer
+		-To calculate output of input x_i
+			-take all other x_j in dataset and let y_i = 1/N (sum_j)(f(x_i, x_j)), where f is a NN
+		-This pairwise averages induces an approixmate equivariance in symmetry spaces
 
 Scale Invariant Convolutional Neural Network
 https://arxiv.org/abs/1411.6369
