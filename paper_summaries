@@ -1,3 +1,11 @@
+
+
+Spatial Transformer Networks (RIP invariance idea)
+https://arxiv.org/pdf/1506.02025.pdf
+	-Aight invariance rip
+	-New module that learns an affine transofmration (six degress of freedom) and applies it on the input
+	-Add module to CNN to learn affine invariance
+	
 Permutation-equivariant neural networks applied to dynamics prediction
 https://arxiv.org/pdf/1612.04530.pdf
 	-Utilizes idea that permutation invariance is via addition
