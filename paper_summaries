@@ -1,3 +1,9 @@
+Graph CNN
+https://tkipf.github.io/graph-convolutional-networks/
+	-Not related
+	-Neural network where you input is a graph with an associated adjacency matrix
+	-A form of a generlized cnn?
+
 Measuring Invariances in Deep Neural Networks (Goodfellow bois)
 https://ai.stanford.edu/~ang/papers/nips09-MeasuringInvariancesDeepNetworks.pdf
 	-Invariance score measures how much a hidden unit fires due to transformation (firing function is simple threshold)
@@ -5,7 +11,6 @@ https://ai.stanford.edu/~ang/papers/nips09-MeasuringInvariancesDeepNetworks.pdf
 		G is the global firing rate, how much the hidden unit fires over all of x
 		-High score means the hidden unit fires selectively and fires on transofmrations over good X that causes the unit to fire
 		in the first place
-
 
 Deep Sets
 https://papers.nips.cc/paper/6931-deep-sets.pdf
