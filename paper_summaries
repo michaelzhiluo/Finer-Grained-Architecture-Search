@@ -1,5 +1,17 @@
 
 
+Deep Sets
+https://papers.nips.cc/paper/6931-deep-sets.pdf
+	-Inspired by Invariant Math theorem which  says if X is a set from a countable domain XX and we have a function f(X): 
+	(a functin that maps a set like a set of mnist digits to the sum of that set)
+		- y = f( sum(all x in theta(x)) is invariant 
+		-obvious cuz sum is invariant
+		-In this case, deep set is where f is a neural network, and theta is some feature/latent representation
+	-Also inspired by an equivariant math theorem which says for a neural network layer to be equivarent:
+		-Wiehgt matrix must be in form W = lambda* I + gamma*(1 * 1^T)
+			-lambda is scalaer, I is indentity matrix, gamma scalaer, 1 is a vector of [1,1,1,1,..]
+	-This permutation invariance only works on net that TAKE IN A SET, not a individual datapoint or a batch of them
+
 Spatial Transformer Networks (RIP invariance idea)
 https://arxiv.org/pdf/1506.02025.pdf
 	-Aight invariance rip
