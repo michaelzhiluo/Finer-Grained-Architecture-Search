@@ -1,3 +1,10 @@
+Measuring Invariances in Deep Neural Networks (Goodfellow bois)
+https://ai.stanford.edu/~ang/papers/nips09-MeasuringInvariancesDeepNetworks.pdf
+	-Invariance score measures how much a hidden unit fires due to transformation (firing function is simple threshold)
+		-Mathmeatically, D/G where D is the firing rate of transformations over good inputs X. like from mnist
+		G is the global firing rate, how much the hidden unit fires over all of x
+		-High score means the hidden unit fires selectively and fires on transofmrations over good X that causes the unit to fire
+		in the first place
 
 
 Deep Sets
