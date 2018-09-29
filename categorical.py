@@ -16,7 +16,7 @@ def gumbel_softmax_sample(logits, temperature):
 
 
 # From https://gist.github.com/ericjang/1001afd374c2c3b7752545ce6d9ed349
-def _gumbel_softmax(logits, temperature, hard_assignment):
+def gumbel_softmax(logits, temperature, hard_assignment):
     """Sample from the Gumbel-Softmax distribution and optionally discretize.
 
     Args:
