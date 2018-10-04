@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-
+from categorical import sample_gumbel, gumbel_softmax_sample, gumbel_softmax
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("data/mluo/tmp/data/", one_hot=True)
 
@@ -17,10 +17,13 @@ conv_weights = tf.Variable(tf.random_normal([32, 25, 1]))
 alpha = tf.Variable(tf.random_normal([784, 25, 784]), name = "alpha")
 s_alpha = tf.nn.softmax(alpha)
 
-gg = tf.cond(condition > 0, lambda: tf.contrib.distributions.Categorical(probs = s_alpha).sample(1)[0], lambda: tf.argmax(s_alpha, axis = 2, output_type=tf.int32))
+dist = gumbel_softmax(s_alpha, 0.5, True)
+dist = tf.argmax(s_alpha, axis=2, output_type=tf.int32)
+
+#  tf.contrib.distributions.Categorical(probs = s_alpha).sample(1)[0]
+gg = tf.cond(condition > 0, lambda: dist, lambda: tf.argmax(s_alpha, axis = 2, output_type=tf.int32))
 temp = tf.gather(training_data, gg, axis = 1)
 
-#output=tf.tensordot(temp, conv_weights, axes = 0)
 output = tf.reshape(tf.squeeze(tf.einsum("aij,bjk->abik",temp, conv_weights)), [batch_size, 28, 28, 32])
 
 bias1 = tf.Variable(tf.random_normal([32]))
@@ -74,7 +77,9 @@ with tf.Session() as sess:
     while step <10000:
         batch_x, batch_y = mnist.train.next_batch(batch_size)
         if(step<5000):
-                opt = sess.run(optimizer, feed_dict = {training_data: batch_x, training_labels: batch_y, condition: b})
+                d, opt = sess.run([dist,optimizer], feed_dict = {training_data: batch_x, training_labels: batch_y, condition: b})
+                print(d)
+                print(d.shape)
                 exit(0)
         else:
                 opt = sess.run(optimizer, feed_dict = {training_data: batch_x, training_labels: batch_y, condition: a})
