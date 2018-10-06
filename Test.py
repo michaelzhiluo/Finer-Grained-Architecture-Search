@@ -18,7 +18,7 @@ alpha = tf.Variable(tf.random_normal([784, 25, 784]), name = "alpha")
 s_alpha = tf.nn.softmax(alpha)
 
 dist = gumbel_softmax(s_alpha, 0.5, True)
-dist = tf.argmax(s_alpha, axis=2, output_type=tf.int32)
+dist = tf.argmax(dist, axis=2, output_type=tf.int32)
 
 #  tf.contrib.distributions.Categorical(probs = s_alpha).sample(1)[0]
 gg = tf.cond(condition > 0, lambda: dist, lambda: tf.argmax(s_alpha, axis = 2, output_type=tf.int32))
@@ -76,13 +76,13 @@ with tf.Session() as sess:
     # Keep training until reach max iterations
     while step <10000:
         batch_x, batch_y = mnist.train.next_batch(batch_size)
-        if(step<5000):
+        if(step<10000):
                 d, opt = sess.run([dist,optimizer], feed_dict = {training_data: batch_x, training_labels: batch_y, condition: b})
-                print(d)
-                print(d.shape)
-                exit(0)
+                if(step==10):
+                  exit(0)
         else:
                 opt = sess.run(optimizer, feed_dict = {training_data: batch_x, training_labels: batch_y, condition: a})
+        
         if(step%100==0):
           lol, loss, acc = sess.run([gg, cost, accuracy], feed_dict={training_data: batch_x,
                                                            training_labels: batch_y, condition: a})
