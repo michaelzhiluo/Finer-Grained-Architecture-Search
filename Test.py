@@ -3,6 +3,8 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from categorical import sample_gumbel, gumbel_softmax_sample, gumbel_softmax
 from tensorflow.examples.tutorials.mnist import input_data
+from Dataset import DataSet
+import seaborn as sns
 
 # Bilevel optimization from DARTS
 
@@ -34,6 +36,8 @@ hyper_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope = 'Hyperpara
 
 # Building Graph
 
+#-----------------------------------First Layer-----------------------------------#
+
 s_alpha = tf.nn.softmax(alpha)
 
 dist = gumbel_softmax(s_alpha, 0.5, True)
@@ -51,6 +55,7 @@ x = tf.nn.relu(x)
 #1st Pooling Layer
 x = tf.nn.max_pool(x, ksize = [1,2,2,1], strides = [1,2,2,1], padding = 'SAME')
 
+#----------------------------------------------------------------------------------#
 
 #Fully-Connected Layer
 x = tf.reshape(x, [-1, 14*14*32])
@@ -64,10 +69,11 @@ loss_vector = tf.nn.softmax_cross_entropy_with_logits_v2(logits=output, labels=t
 cost = tf.reduce_mean(loss_vector)
 
 with tf.variable_scope("Optimizer"):
-  optimizer_weight = tf.train.AdamOptimizer(0.05)
-weight_grad = optimizer_weight.compute_gradients(cost, weight_vars)
+  optimizer_weight = tf.train.AdamOptimizer(0.001)
+  optimizer_hyper = tf.train.AdamOptimizer(0.001)
 
-optimizer_hyper = tf.train.AdamOptimizer(0.5)
+weight_grad = optimizer_weight.compute_gradients(cost, weight_vars) 
+
 hyper_grad = optimizer_hyper.compute_gradients(cost, hyper_vars)  
 
 optimizer_scope = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, "Optimizer")
@@ -83,32 +89,53 @@ init = tf.global_variables_initializer()
 tf_config = tf.ConfigProto(inter_op_parallelism_threads=1, intra_op_parallelism_threads=1)
 tf_config.gpu_options.allow_growth = True
 
+hyper_train = DataSet(mnist.test.images[:5000], mnist.test.labels[:5000])
+validation = DataSet(mnist.test.images[5000:], mnist.test.labels[5000:])
+
+x = np.arange(784)
 
 with tf.Session() as sess:
     sess.run(init)
-    meta_step = 1
-
+    meta_step = 0
+    
     # Meta-iterations
-    while meta_step <1000:
+    while meta_step <300:
+      
+      if(meta_step%10==0):
+        print("LOL")
+        a = sess.run(s_alpha)
+        
+        #sns.barplot(x, y = a[0][0])
+        print(np.max(a, axis=2))
+        print(np.argmax(a, axis=2))
+        
+        #plt.show()
       print("----------------------------META-ITERATION " + str(meta_step) + "----------------------------")
+      sess.run(tf.initialize_variables(optimizer_scope))
       print("SWITCHING TO WEIGHT OPT")
       # Weight optimization
       weight_step = 0
-      sess.run(tf.initialize_variables(optimizer_scope))
-      while(weight_step<100):
+      while(weight_step<1):
         batch_x, batch_y = mnist.train.next_batch(batch_size)
         opt = sess.run(update, feed_dict={training_data: batch_x, training_labels: batch_y, condition: 1})
 
-        if(weight_step%10==0):
+        if(weight_step%1==0):
           loss, acc = sess.run([cost, accuracy], feed_dict={training_data: batch_x,
                                                            training_labels: batch_y, condition: 1})
           print("Weight Iter " + str(weight_step) + " with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " +  "{:.5f}".format(acc))
         weight_step+=1
 
+      batch_x, batch_y = mnist.test.next_batch(batch_size)
+      loss, acc = sess.run([cost, accuracy], feed_dict={training_data: batch_x,
+                                                           training_labels: batch_y, condition: 1})
+      print("Metaiteration Step " + str(meta_step) + " with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Validation Accuracy= " +  "{:.5f}".format(acc))
+
+
       print("SWITCHING TO HYPERPARAM OPT")
-      #Hyperparam optimization
+      #Hyperparameter optimization
+      sess.run(tf.initialize_variables(optimizer_scope))
       hyper_step =0
-      while(hyper_step<3):
+      while(hyper_step<2):
         batch_x, batch_y = mnist.test.next_batch(batch_size)
         opt = sess.run(update, feed_dict={training_data: batch_x, training_labels: batch_y, condition: 0})
 
@@ -117,7 +144,26 @@ with tf.Session() as sess:
                                                            training_labels: batch_y, condition: 1})
           print("Hyper Iter " + str(hyper_step) + " with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " +  "{:.5f}".format(acc))
         hyper_step+=1
+
       meta_step+=1
+    
+    #Fine tune network now
+    weight_step = 0
+    sess.run(tf.initialize_variables(weight_vars))
+    while(weight_step<6000):
+        batch_x, batch_y = mnist.train.next_batch(batch_size)
+        opt = sess.run(update, feed_dict={training_data: batch_x, training_labels: batch_y, condition: 1})
+
+        if(weight_step%100==0):
+          loss, acc = sess.run([cost, accuracy], feed_dict={training_data: batch_x,
+                                                           training_labels: batch_y, condition: 1})
+          print("Weight Iter " + str(weight_step) + " with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " +  "{:.5f}".format(acc))
+          acc = sess.run([accuracy], feed_dict={training_data: mnist.test.images[:batch_size],
+                                      training_labels: mnist.test.labels[:batch_size], condition: 1})
+          print("Accuracy MNIST:", acc)
+
+        weight_step+=1
+
 
     acc = sess.run([accuracy], feed_dict={training_data: mnist.test.images[:batch_size],
                                       training_labels: mnist.test.labels[:batch_size], condition: 1})
