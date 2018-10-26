@@ -49,7 +49,7 @@ gg = tf.cond(condition > 0, lambda: tf.gather(training_data, tf.argmax(s_alpha, 
 
 output = tf.reshape(tf.squeeze(tf.einsum("aij,bjk->abik",gg, conv_weights)), [batch_size, 28, 28, 32])
 
-x = tf.nn.bias_add(output, bias1)
+x = tf.nn.bias_add(output, bias1) 
 x = tf.nn.relu(x)
 
 #1st Pooling Layer
@@ -60,7 +60,7 @@ x = tf.nn.max_pool(x, ksize = [1,2,2,1], strides = [1,2,2,1], padding = 'SAME')
 #Fully-Connected Layer
 x = tf.reshape(x, [-1, 14*14*32])
 x = tf.add(tf.matmul(x, layer3), bias3)
-x = tf.nn.relu(x)
+x = tf.nn.relu(x) 
 
 output =  tf.add(tf.matmul(x, layer4), bias4)
 
