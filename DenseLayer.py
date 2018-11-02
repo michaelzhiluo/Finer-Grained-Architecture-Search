@@ -9,7 +9,7 @@ def DenseLayer(inputs,
 			num_filters,
 			weight_train,
 			activation_fn = tf.nn.relu,
-			weights_initalizer = tf.contrib.layers.xavier_initializer(),
+			weights_initalizer = tf.initializers.random_uniform(0, 1),#tf.contrib.layers.xavier_initializer(),
 			biases_initializer = tf.zeros_initializer(),
 			weight_scope = "Weights",
 			hyperparam_scope = "Hyperparameters"):
@@ -27,8 +27,8 @@ def DenseLayer(inputs,
 
 	#Declaring tf weight variable of size output_f
 	with tf.variable_scope(weight_scope, reuse = tf.AUTO_REUSE):
-		weights = tf.get_variable("weight", shape=[num_filters, num_weights_per_filter], initializer=weights_initalizer) #1]) # Since image is flattened, it's only one channel
-		bias = tf.get_variable("bias", shape=[num_filters])
+		weights = tf.Variable(weights_initalizer([num_filters, num_weights_per_filter])) #1]) # Since image is flattened, it's only one channel
+		bias = tf.Variable(biases_initializer([num_filters]))
 
 	with tf.variable_scope(hyperparam_scope, reuse = tf.AUTO_REUSE):
 		alpha = tf.get_variable("hyperparam", shape=[output, num_weights_per_filter, inputs.get_shape()[1].value])

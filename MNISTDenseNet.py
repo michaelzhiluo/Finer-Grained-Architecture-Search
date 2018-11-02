@@ -8,11 +8,11 @@ import seaborn as sns
 from DenseLayer import DenseLayer
 
 # Bilevel optimization from DARTS
-debug = False
+debug = True
 mnist = input_data.read_data_sets("data/mluo/tmp/data/", one_hot=True)
 
 batch_size = 512
-meta_iterations = 300
+num_iterations = 1000000
 
 # Input Data and Labels
 training_data = tf.placeholder(tf.float32, [None, 784])
@@ -27,9 +27,23 @@ with tf.variable_scope("Weights", reuse = tf.AUTO_REUSE):
   bias4 = tf.Variable(tf.random_normal([10]))
 
 # Building Graph
-haas = tf.constant(4)
-#-----------------------------------First Layer-----------------------------------#
 
+#-----------------------------------First Layer-----------------------------------#
+'''
+s_alpha = tf.nn.softmax(alpha)
+
+dist = gumbel_softmax(s_alpha, 0.5, True)
+temp = tf.einsum("abc,dc->dab",dist, training_data)
+
+#dist = tf.argmax(dist, axis=2, output_type=tf.int32)
+gg = tf.cond(train_weights > 0, lambda: tf.gather(training_data, tf.argmax(s_alpha, axis = 2, output_type=tf.int32), axis=1), lambda: temp)
+#temp = tf.gather(training_data, gg, axis = 1)
+print(gg)
+output = tf.reshape(tf.squeeze(tf.einsum("aij,bjk->abik",gg, conv_weights)), [batch_size, 28, 28, 32])
+print(output)
+x = tf.nn.bias_add(output, bias1) 
+x = tf.nn.relu(x)
+'''
 x = DenseLayer(training_data, output = 784, num_weights_per_filter = 25, num_filters = 32, weight_train = train_weights)
 x = tf.reshape(x, [batch_size, 28, 28, 32])   
 #1st Pooling Layer
@@ -53,7 +67,7 @@ cost = tf.reduce_mean(loss_vector)
 
 with tf.variable_scope("Optimizer"):
   optimizer_weight = tf.train.AdamOptimizer(0.001)
-  optimizer_hyper = tf.train.AdamOptimizer(0.1)
+  optimizer_hyper = tf.train.AdamOptimizer(0.001)
 
 weight_grad = optimizer_weight.compute_gradients(cost, weight_vars) 
 
@@ -81,24 +95,12 @@ with tf.Session() as sess:
     meta_step = 0
 
     # Meta-iterations
-    while meta_step <meta_iterations:
-      if(meta_step%10==0):
-            a = sess.run(hyper_vars[0])
-            print(a.shape)
-            print(np.max(a, axis=2))
-            print(np.argmax(a, axis=2))
+    while meta_step <300:
+      
       print("----------------------------META-ITERATION " + str(meta_step) + "----------------------------")
       sess.run(tf.initialize_variables(optimizer_scope))
-      '''
-      DART Update: 
-          0) Update w_(t-1) over training set
-          1) Save w_(t-1)
-          2) Update w_t from w_(t-1) over training set
-          3) Using w_t, update alpha_(t-1) to alpha_t over validation set
-          4) Reload w_(t-1)
-      '''
       print("SWITCHING TO WEIGHT OPT")
-      #Step 0: Weight Optimization
+      # Weight optimization
       weight_step = 0
       while(weight_step<1):
         batch_x, batch_y = mnist.train.next_batch(batch_size)
@@ -115,20 +117,16 @@ with tf.Session() as sess:
                                                            training_labels: batch_y, train_weights: 1})
       print("Metaiteration Step " + str(meta_step) + " with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Validation Accuracy= " +  "{:.5f}".format(acc))
 
-      #Step 1
-      weight_list = sess.run(weight_vars)
 
-      #Step 2
-      batch_x, batch_y = mnist.train.next_batch(batch_size)
-      opt = sess.run(update, feed_dict={training_data: batch_x, training_labels: batch_y, train_weights: 1})
-
-      #Step 3: Hyperparameter optimization
       print("SWITCHING TO HYPERPARAM OPT")
+      #Hyperparameter optimization
       sess.run(tf.initialize_variables(optimizer_scope))
       hyper_step =0
       while(hyper_step<1):
         batch_x, batch_y = mnist.test.next_batch(batch_size)
         opt = sess.run(update, feed_dict={training_data: batch_x, training_labels: batch_y, train_weights: 0})
+
+
 
         if(hyper_step%1==0):
           loss, acc = sess.run([cost, accuracy], feed_dict={training_data: batch_x,
@@ -136,11 +134,14 @@ with tf.Session() as sess:
           print("Hyper Iter " + str(hyper_step) + " with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " +  "{:.5f}".format(acc))
         hyper_step+=1
 
-      #Step 4: Restore Previous Weights
-      sess.run(haas, feed_dict={var: weight_list[counter] for counter, var in enumerate(weight_vars)})
+      if(meta_step%10==0):
+        a = sess.run(hyper_vars[0])
+        
+        #sns.barplot(x, y = a[0][0])
+        print(np.max(a, axis=2))
+        print(np.argmax(a, axis=2))
       meta_step+=1
     
-    exit(0)
     #Fine tune network now
     weight_step = 0
     sess.run(tf.initialize_variables(weight_vars))
