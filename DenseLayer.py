@@ -1,29 +1,48 @@
 import numpy as np
 import tensorflow as tf
-
+from categorical import sample_gumbel, gumbel_softmax_sample, gumbel_softmax
+from tensorflow.examples.tutorials.mnist import input_data
 
 def DenseLayer(inputs, 
 			output, 
+			num_weights_per_filter, 
+			num_filters,
+			weight_train,
 			activation_fn = tf.nn.relu,
-			num_weights_per_filter = 25, 
-			num_filters = 32,
-			weights_initalizer = initializers.xavier_initializer(),
-			biases_initializer=tf.zeros_initializer(),
+			weights_initalizer = tf.contrib.layers.xavier_initializer(),
+			biases_initializer = tf.zeros_initializer(),
 			weight_scope = "Weights",
 			hyperparam_scope = "Hyperparameters"):
 	'''
-	inputs-Input tensor of shape [batch_size, , in_channels]
+	DenseLayer takes any image, converts it to [batchsize, image_size]. Image size is all the image dimensions multiplied together.
+	For example, a 100 10x10x3 standard images will reduce [100, 10*10*3].
+
+	inputs-Input tensor of shape [batch_size] + [Any Image Shape] (it will be flattened anyways)
+	output- Scalar Output Size e.g 100
+	num_filters - Output filters 
 	'''
 
-	#Flatten input to [batch_size, total_input_dim]
-	input_shape = tf.shape(inputs)
-	inputs = tf.manip.reshape(inputs, [None, tf.reduce_prod(input_shape[1:])])
+	#Flatten/vectorizes input to [batch_size, input_size]
+	inputs = tf.contrib.layers.flatten(inputs)
 
+	#Declaring tf weight variable of size output_f
+	with tf.variable_scope(weight_scope, reuse = tf.AUTO_REUSE):
+		weights = tf.get_variable("weight", shape=[num_filters, num_weights_per_filter], initializer=weights_initalizer) #1]) # Since image is flattened, it's only one channel
+		bias = tf.get_variable("bias", shape=[num_filters])
 
-	with tf.variable_scope(weight_scope):
-		weights = tf.get_variable("weight", shape=[num_filters, num_weights_per_filter, input_shape[2]])
+	with tf.variable_scope(hyperparam_scope, reuse = tf.AUTO_REUSE):
+		alpha = tf.get_variable("hyperparam", shape=[output, num_weights_per_filter, inputs.get_shape()[1].value])
 
-	with tf.variable_scope(hyperparam_scope):
-		alpha = tf.get_variable("hyperparam", shape=[])
-	
-	
+	#SoftMax Alpha
+	s_alpha = tf.nn.softmax(alpha)
+	dist = gumbel_softmax(s_alpha, 0.5, True)
+
+	sampled_connections = tf.einsum("abc,dc->dab", dist, inputs)
+	max_connections = tf.gather(inputs, tf.argmax(s_alpha, axis = 2, output_type=tf.int32), axis=1)
+
+	connections = tf.cond(weight_train>0, lambda: max_connections, lambda: sampled_connections)
+
+	multiplied_output = tf.einsum("aij,bj->aib", connections, weights)
+
+	final_output = activation_fn(tf.nn.bias_add(multiplied_output, bias))
+	return final_output
