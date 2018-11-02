@@ -8,6 +8,7 @@ def DenseLayer(inputs,
 			num_weights_per_filter, 
 			num_filters,
 			weight_train,
+			exploration,
 			activation_fn = tf.nn.relu,
 			weights_initalizer = tf.initializers.random_uniform(0, 1),#tf.contrib.layers.xavier_initializer(),
 			biases_initializer = tf.zeros_initializer(),
@@ -35,9 +36,13 @@ def DenseLayer(inputs,
 
 	#SoftMax Alpha
 	s_alpha = tf.nn.softmax(alpha)
-	dist = gumbel_softmax(s_alpha, 0.5, True)
+	# If exploration, sample unifromly, else wise sample from your learned alphas
+	#dist = tf.cond(exploration>0, lambda: gumbel_softmax( , 0.5, True), lambda: gumbel_softmax(s_alpha, 0.5, True))
 
+	dist = gumbel_softmax(s_alpha, 0.5, True)
+	
 	sampled_connections = tf.einsum("abc,dc->dab", dist, inputs)
+
 	max_connections = tf.gather(inputs, tf.argmax(s_alpha, axis = 2, output_type=tf.int32), axis=1)
 
 	connections = tf.cond(weight_train>0, lambda: max_connections, lambda: sampled_connections)
