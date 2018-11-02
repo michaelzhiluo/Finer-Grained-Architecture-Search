@@ -12,7 +12,7 @@ debug = False
 mnist = input_data.read_data_sets("data/mluo/tmp/data/", one_hot=True)
 
 batch_size = 512
-meta_iterations = 300
+meta_iterations = 100000
 
 # Input Data and Labels
 training_data = tf.placeholder(tf.float32, [None, 784])
@@ -27,7 +27,6 @@ with tf.variable_scope("Weights", reuse = tf.AUTO_REUSE):
   bias4 = tf.Variable(tf.random_normal([10]))
 
 # Building Graph
-haas = tf.constant(4)
 #-----------------------------------First Layer-----------------------------------#
 
 x = DenseLayer(training_data, output = 784, num_weights_per_filter = 25, num_filters = 32, weight_train = train_weights)
@@ -137,7 +136,10 @@ with tf.Session() as sess:
         hyper_step+=1
 
       #Step 4: Restore Previous Weights
-      sess.run(haas, feed_dict={var: weight_list[counter] for counter, var in enumerate(weight_vars)})
+      for counter, var in enumerate(weight_vars):
+        sess.run(tf.assign(var, weight_list[counter]))
+      #sess.run(haas, feed_dict={var: weight_list[counter] for counter, var in enumerate(weight_vars)})
+      assert np.array_equal(weight_list[0], sess.run(weight_vars)[0])
       meta_step+=1
     
     exit(0)
