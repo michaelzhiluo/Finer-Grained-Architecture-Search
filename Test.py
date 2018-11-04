@@ -146,7 +146,7 @@ with tf.Session() as sess:
 
         if(hyper_step%1==0):
           loss, acc = sess.run([cost, accuracy], feed_dict={training_data: batch_x,
-                                                           training_labels: batch_y, train_weights: 1})
+                                                           training_labels: batch_y, train_weights: 1, exploration: 0})
           print("Hyper Iter " + str(hyper_step) + " with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " +  "{:.5f}".format(acc))
         hyper_step+=1
 
