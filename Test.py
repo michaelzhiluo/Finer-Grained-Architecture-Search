@@ -14,7 +14,7 @@ mnist = input_data.read_data_sets("data/mluo/tmp/data/", one_hot=True)
 batch_size = 512
 meta_iterations = 100000
 exp =0.9
-exp_decay = 0.05
+exp_decay = 0.001
 
 # Input Data and Labels
 training_data = tf.placeholder(tf.float32, [None, 784])
