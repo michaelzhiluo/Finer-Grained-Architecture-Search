@@ -26,7 +26,7 @@ def DenseLayer(inputs,
 	#Flatten/vectorizes input to [batch_size, input_size]
 	inputs = tf.contrib.layers.flatten(inputs)
 
-	#Declaring tf weight variable of size output_f
+	#Declaring tf weight variable of size output
 	with tf.variable_scope(weight_scope, reuse = tf.AUTO_REUSE):
 		weights = tf.Variable(weights_initalizer([num_filters, num_weights_per_filter])) #1]) # Since image is flattened, it's only one channel
 		bias = tf.Variable(biases_initializer([num_filters]))
@@ -35,17 +35,19 @@ def DenseLayer(inputs,
 		alpha = tf.get_variable("hyperparam", shape=[output, num_weights_per_filter, inputs.get_shape()[1].value])
 
 	#SoftMax Alpha
-	s_alpha = tf.nn.softmax(alpha)
+	s_alpha = tf.nn.softmax(alpha, name="softmax_alpha")
+
+	#expected_value_connections = tf.einsum("abc, dc->da", s_alpha, inputs)
 	# If exploration, sample unifromly, else wise sample from your learned alphas
-	dist = tf.cond(exploration > 0, lambda: gumbel_softmax(s_alpha, 1000000000, True), lambda:  gumbel_softmax(s_alpha, 0.5, True))
+	dist = tf.cond(exploration > 0, lambda: gumbel_softmax(alpha, 1000000000, True), lambda:  gumbel_softmax(alpha, 1, True))
 
 	sampled_connections = tf.einsum("abc,dc->dab", dist, inputs)
 
-	max_connections = tf.gather(inputs, tf.argmax(s_alpha, axis = 2, output_type=tf.int32), axis=1)
+	max_connections = tf.gather(inputs, tf.argmax(s_alpha, axis = 2, output_type=tf.int32, name="argmax_alpha"), axis=1)
 
-	connections = tf.cond(weight_train>0, lambda: max_connections, lambda: sampled_connections)
+	connections = tf.cond(weight_train>0, lambda: sampled_connections, lambda: sampled_connections)
 
 	multiplied_output = tf.einsum("aij,bj->aib", connections, weights)
 
 	final_output = activation_fn(tf.nn.bias_add(multiplied_output, bias))
-	return final_output
+	return dist, sampled_connections, final_output

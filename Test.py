@@ -6,15 +6,17 @@ from tensorflow.examples.tutorials.mnist import input_data
 from Dataset import DataSet
 import seaborn as sns
 from DenseLayer import DenseLayer
+from tensorflow.python.tools import inspect_checkpoint as chkp
+from IPython import embed
 
 # Bilevel optimization from DARTS
 debug = False
 mnist = input_data.read_data_sets("data/mluo/tmp/data/", one_hot=True)
 
 batch_size = 512
-meta_iterations = 100000
+meta_iterations = 10000
 exp =0.9
-exp_decay = 0.001
+exp_decay = 0.999
 
 # Input Data and Labels
 training_data = tf.placeholder(tf.float32, [None, 784])
@@ -33,7 +35,7 @@ with tf.variable_scope("Weights", reuse = tf.AUTO_REUSE):
 # Building Graph
 #-----------------------------------First Layer-----------------------------------#
 
-x = DenseLayer(training_data, output = 784, num_weights_per_filter = 25, num_filters = 32, weight_train = train_weights, exploration = exploration)
+s_alpha, sampled_connections, x = DenseLayer(training_data, output = 784, num_weights_per_filter = 25, num_filters = 32, weight_train = train_weights, exploration = exploration)
 x = tf.reshape(x, [batch_size, 28, 28, 32])   
 #1st Pooling Layer
 x = tf.nn.max_pool(x, ksize = [1,2,2,1], strides = [1,2,2,1], padding = 'SAME')
@@ -62,7 +64,7 @@ cost = tf.reduce_mean(loss_vector)
 
 with tf.variable_scope("Optimizer"):
   optimizer_weight = tf.train.AdamOptimizer(0.001)
-  optimizer_hyper = tf.train.AdamOptimizer(0.1)
+  optimizer_hyper = tf.train.AdamOptimizer(0.01)
 
 optimizer_scope = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, "Optimizer")
 opt_init = tf.initialize_variables(optimizer_scope)
@@ -76,27 +78,63 @@ correct_pred = tf.equal(tf.argmax(output, 1), tf.argmax(training_labels, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
 #---------------------------------------------------------------------------------------------------------------------------#
+'''
+saver = tf.train.Saver()
+chkp.print_tensors_in_checkpoint_file("../model/model.ckpt", tensor_name='', all_tensors=True)
+
+for i in tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='Weights'):
+    print(i)
+    print(i.name)
+
+exit(0)
+
+'''
 
 init = tf.global_variables_initializer()
 tf_config = tf.ConfigProto(inter_op_parallelism_threads=1, intra_op_parallelism_threads=1)
 tf_config.gpu_options.allow_growth = True
-
 #hyper_train = DataSet(mnist.test.images[:5000], mnist.test.labels[:5000])
 #validation = DataSet(mnist.test.images[5000:], mnist.test.labels[5000:])
 
 x = np.arange(784)
-
+max_accuracy = 0
 with tf.Session() as sess:
     sess.run(init)
     meta_step = 0
 
     # Meta-iterations
     while meta_step <meta_iterations:
-      if(meta_step%10==0):
-            a = sess.run(hyper_vars[0])
-            print(a.shape)
-            print(np.max(a, axis=2))
-            print(np.argmax(a, axis=2))
+
+      if(False and meta_step%100==0):
+            #a = sess.run(hyper_vars[0])
+            #print(a.shape)
+            #print(np.max(a, axis=2))
+            #print(np.argmax(a, axis=2))
+            #print([n.name for n in tf.get_default_graph().as_graph_def().node])
+            #print(accuracy)
+            #print(sess.run(tf.get_default_graph().get_operation_by_name("softmax_alpha").values())[0].shape)
+            '''
+            maximum_indexes = sess.run(tf.get_default_graph().get_operation_by_name("argmax_alpha").values())[0]
+            hi = np.zeros(784)
+            for i in maximum_indexes[0]:
+              hi[i] = 1
+            fig, ax = plt.subplots()
+            sns.heatmap(hi.reshape((28,28)), ax = ax, square=True, cmap="BuPu", cbar = False)  
+            fig.savefig("../argmax/" + str(meta_step) + ".png", dpi=96)
+            '''
+            embed()
+            
+            kernels = sess.run(s_alpha)
+            
+            fig, ax = plt.subplots(5, 5, sharex=True, sharey=True)
+            for i, ax in enumerate(ax.flat):
+              sns.heatmap(kernels[0][i].reshape((28,28)), ax = ax, square=True, cmap="BuPu", cbar = True)
+            fig.savefig("../figures/" + str(meta_step) + ".png", dpi=96, bbox_inches='tight')
+            
+
+            #Plots the argmax of weight kernels
+
+            plt.close()
       print("----------------------------META-ITERATION " + str(meta_step) + "----------------------------")
       sess.run(opt_init)
       '''
@@ -124,7 +162,9 @@ with tf.Session() as sess:
       loss, acc = sess.run([cost, accuracy], feed_dict={training_data: batch_x,
                                                            training_labels: batch_y, train_weights: 1, exploration: 0})
       print("Metaiteration Step " + str(meta_step) + " with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Validation Accuracy= " +  "{:.5f}".format(acc))
-
+      if(max_accuracy < acc):
+        max_accuracy = acc
+      print("Max Accuracy " + str(max_accuracy))
       #Step 1
       weight_list = sess.run(weight_vars)
 
@@ -138,6 +178,7 @@ with tf.Session() as sess:
       hyper_step =0
       while(hyper_step<1):
         if(np.random.sample() <= exp):
+          print("EXPLORING")
           opt = sess.run(update, feed_dict={training_data: batch_x, training_labels: batch_y, train_weights: 0, exploration: 1})
         else:
           opt = sess.run(update, feed_dict={training_data: batch_x, training_labels: batch_y, train_weights: 0, exploration: 0})
@@ -160,7 +201,7 @@ with tf.Session() as sess:
     #Fine tune network now
     weight_step = 0
     sess.run(tf.initialize_variables(weight_vars))
-    while(weight_step<6000):
+    while(weight_step<10000):
         batch_x, batch_y = mnist.train.next_batch(batch_size)
         opt = sess.run(update, feed_dict={training_data: batch_x, training_labels: batch_y, train_weights: 1, exploration: 0})
 

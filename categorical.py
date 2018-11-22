@@ -10,6 +10,11 @@ def gumbel_softmax_sample(logits, temperature):
     y = logits + sample_gumbel(tf.shape(logits))
     return tf.nn.softmax(y / temperature)
 
+def gumbel_softmax_sample_no_noise(logits, temperature):
+    """Draw a sample from the Gumbel-Softmax distribution."""
+    y = logits + sample_gumbel(tf.shape(logits))
+    return tf.nn.softmax(y / temperature)
+
 def gumbel_softmax(logits, temperature, hard_assignment):
     """Sample from the Gumbel-Softmax distribution and optionally discretize.
 
@@ -23,7 +28,7 @@ def gumbel_softmax(logits, temperature, hard_assignment):
         be a probability distribution that sums to one across classes.
     """
     assert temperature > 0, "Temperature must be positive."
-    y = gumbel_softmax_sample(logits, temperature)
+    y = gumbel_softmax_sample_no_noise(logits, temperature)
     if hard_assignment is True:
         k = tf.shape(logits)[-1]
         y_hard = tf.cast(tf.equal(y, tf.reduce_max(y, -1, keep_dims=True)), y.dtype)
