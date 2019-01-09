@@ -19,7 +19,7 @@ class GeneralizedConvNetwork(object):
 		self.batch_size = 256
 		self.weight_lr = 0.001
 		self.meta_lr = 0.001
-		self.beta = 0.001
+		self.beta = 0.01
 		# If just training hyperparameter (comment out weight training), meta_lr = 0.001, beta = 0.01 seems optimal, can get to 1.00 val accuracy!
 		self.build_model()
 		return
@@ -49,7 +49,6 @@ class GeneralizedConvNetwork(object):
 			self.weights['b2'] = tf.Variable(tf.random_normal([10]))
 
 		self.output = self.feed_forward(self.train_input, self.weights)
-
 		self.train_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.output, labels=self.train_label))
 
 		
@@ -139,12 +138,13 @@ for i in tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='Weights'):
 						print(i.shape)
 						sess.run(tf.assign(i, tf.convert_to_tensor(j)))
 						assert np.array_equal(sess.run(i), j)
-print("Restored Weights from trained Conv NEtwork")
+print("Restored Weights from trained Conv Network")
+
 while meta_step <meta_iterations:
 
 	print("----------------------------META-ITERATION " + str(meta_step) + "----------------------------")
 	#sess.run(network.opt_init)
-	
+	'''
 	print("SWITCHING TO WEIGHT OPT")
 	weight_step = 0
 	while(weight_step<1):
@@ -155,7 +155,7 @@ while meta_step <meta_iterations:
 			loss, acc = sess.run([network.train_loss, network.accuracy], feed_dict={network.train_input: train_input, network.train_label: train_label, network.train_weights: 1, network.exploration: 0})
 			print("Weight Iter " + str(weight_step) + " with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " +  "{:.5f}".format(acc))
 		weight_step+=1
-	
+	'''
 	print("SWITCHING TO HYPERPARAM OPT")
 	hyper_step =0
 	while(hyper_step<1):
