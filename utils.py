@@ -22,14 +22,14 @@ def DenseLayer(inputs,
 
 	#Flatten/vectorizes input to [batch_size, input_size]
 	inputs = tf.contrib.layers.flatten(inputs)
+	
 	with tf.variable_scope(hyperparam_scope, reuse = tf.AUTO_REUSE):
 		alpha = tf.get_variable("alpha", shape=[output, conv_weight.get_shape()[1], inputs.get_shape()[1].value])
 
 	#SoftMax Alpha
 	s_alpha = tf.nn.softmax(alpha, name="softmax_alpha")
 
-	#expected_value_connections = tf.einsum("abc, dc->da", s_alpha, inputs)
-	# If exploration, sample unifromly, else wise sample from your learned alphas
+	# If exploration, sample uniformly (infinitely high temperature), elsewise sample from your learned alphas with temperature set to 1
 	dist = tf.cond(exploration > 0, lambda: gumbel_softmax(alpha, 100000000000, True), lambda:  gumbel_softmax(alpha, 1, True))
 
 	sampled_connections = tf.einsum("abc,dc->dab", dist, inputs)
