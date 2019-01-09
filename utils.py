@@ -36,10 +36,16 @@ def DenseLayer(inputs,
 
 	max_connections = tf.gather(inputs, tf.argmax(s_alpha, axis = 2, output_type=tf.int32, name="argmax_alpha"), axis=1)
 
-	connections = tf.cond(weight_train>0, lambda: max_connections, lambda: sampled_connections)
+	connections = tf.cond(weight_train>0, lambda: sampled_connections, lambda: sampled_connections)
 
 	multiplied_output = tf.einsum("aij,bj->aib", connections, conv_weight)
 
 	final_output = activation_fn(tf.nn.bias_add(multiplied_output, bias))
 
 	return final_output
+'''
+class Explore(object):
+	def __init__(self, initial_exp, exp_decay):
+		self.initial_exp = initial_exp
+		self.exp_decay  = 
+		'''

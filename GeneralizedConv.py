@@ -19,9 +19,10 @@ class GeneralizedConvNetwork(object):
 		self.batch_size = 256
 		self.weight_lr = 0.001
 		self.meta_lr = 0.001
-		self.beta = 0.01
-		# If just training hyperparameter (comment out weight training), meta_lr = 0.001, beta = 0.01 seems optimal, can get to 1.00 val accuracy!
+		self.beta = 0.005
+		# If just training hyperparameter (comment out weight training), meta_lr = 0.001, beta = 0.001 seems optimal, can get to 1.00 val accuracy!
 		self.build_model()
+		self.add_summaries()
 		return
 
 
@@ -83,8 +84,11 @@ class GeneralizedConvNetwork(object):
 		self.hyper_update = self.hyper_optimizer.apply_gradients(hyper_grad)
 		
 		#Statistics & Miscellaneous
-		correct_pred = tf.equal(tf.argmax(self.output, 1), tf.argmax(self.train_label, 1))
-		self.accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+		weight_correct_pred = tf.equal(tf.argmax(self.output, 1), tf.argmax(self.train_label, 1))
+		self.weight_accuracy = tf.reduce_mean(tf.cast(weight_correct_pred, tf.float32))
+
+		hyper_correct_pred = tf.equal(tf.argmax(self.output1, 1), tf.argmax(self.test_label, 1))
+		self.hyper_accuracy = tf.reduce_mean(tf.cast(hyper_correct_pred, tf.float32))
 
 		self.assign =[]
 		self.prev_weight_ph = []
@@ -92,6 +96,16 @@ class GeneralizedConvNetwork(object):
 				self.prev_weight_ph += [tf.placeholder(tf.float32, var.get_shape())]
 				self.assign+=[tf.assign(var, self.prev_weight_ph[counter])]
 
+	def add_summaries(self):
+		with tf.name_scope('Weight-Training'):
+			self.weight_loss_summ = tf.summary.scalar('Weight-Train Loss', self.train_loss)
+			self.weight_acc_summ = tf.summary.scalar('Weight Accuracy', self.weight_accuracy)
+			self.weight_merged = tf.summary.merge([self.weight_loss_summ, self.weight_acc_summ])
+
+		with tf.name_scope('Hyper-Training'):
+			self.hyper_loss_summ = tf.summary.scalar('Hyper-Train Loss', self.test_loss)
+			self.hyper_acc_summ = tf.summary.scalar('Hyper Accuracy', self.hyper_accuracy)
+			self.hyper_merged = tf.summary.merge([self.hyper_loss_summ, self.hyper_acc_summ])
 	
 	def feed_forward(self, inp, weights):
 		self.layer1 =  tf.reshape(DenseLayer(inp, 784, weights['w0'], weights['b0'], self.train_weights, self.exploration), [self.batch_size, 28, 28, self.num_filters])
@@ -111,18 +125,18 @@ init = tf.global_variables_initializer()
 sess.run(init)
 tf_config = tf.ConfigProto(inter_op_parallelism_threads=1, intra_op_parallelism_threads=1)
 tf_config.gpu_options.allow_growth = True
-
 train_writer = tf.summary.FileWriter('/data/mluo/tensorboard',
 									  sess.graph)
 
 meta_iterations = 100000
 meta_step =0
 
-
 reader = pywrap_tensorflow.NewCheckpointReader("../model/model.ckpt")
 var_to_shape_map = reader.get_variable_to_shape_map()
 
 restored_weights = []
+
+'''
 for key in var_to_shape_map:
 	print("Saved/Restored Tensor_name: ", key)
 	temp = reader.get_tensor(key)
@@ -139,12 +153,13 @@ for i in tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='Weights'):
 						sess.run(tf.assign(i, tf.convert_to_tensor(j)))
 						assert np.array_equal(sess.run(i), j)
 print("Restored Weights from trained Conv Network")
+'''
 
 while meta_step <meta_iterations:
 
 	print("----------------------------META-ITERATION " + str(meta_step) + "----------------------------")
 	#sess.run(network.opt_init)
-	'''
+	
 	print("SWITCHING TO WEIGHT OPT")
 	weight_step = 0
 	while(weight_step<1):
@@ -152,10 +167,11 @@ while meta_step <meta_iterations:
 		opt = sess.run(network.weight_update, feed_dict={network.train_input: train_input, network.train_label: train_label, network.train_weights: 1, network.exploration: 0})
 
 		if(weight_step%1==0):
-			loss, acc = sess.run([network.train_loss, network.accuracy], feed_dict={network.train_input: train_input, network.train_label: train_label, network.train_weights: 1, network.exploration: 0})
+			m, loss, acc = sess.run([network.weight_merged,network.train_loss, network.weight_accuracy], feed_dict={network.train_input: train_input, network.train_label: train_label, network.train_weights: 1, network.exploration: 0})
 			print("Weight Iter " + str(weight_step) + " with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " +  "{:.5f}".format(acc))
+			train_writer.add_summary(m, meta_step)
 		weight_step+=1
-	'''
+	
 	print("SWITCHING TO HYPERPARAM OPT")
 	hyper_step =0
 	while(hyper_step<1):
@@ -171,13 +187,21 @@ while meta_step <meta_iterations:
 			network.train_weights: 0
 			})
 		if(hyper_step%1==0):
-			loss, acc = sess.run([network.train_loss, network.accuracy], 
-				feed_dict={network.train_input: test_input, network.train_label: test_label, network.train_weights: 1, network.exploration: 0})
+			m, loss, acc = sess.run([network.hyper_merged, network.test_loss, network.hyper_accuracy],
+				feed_dict={
+			network.train_input: train_input,
+			network.train_label: train_label,
+			network.test_input: test_input,
+			network.test_label: test_label,
+			network.exploration: 0,
+			network.train_weights: 0
+			})
 			print("Hyper Iter " + str(hyper_step) + " with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Hyperparameter Training Accuracy= " +  "{:.5f}".format(acc))
+			train_writer.add_summary(m, meta_step)
 		hyper_step+=1
 	
 	test_input, test_label = mnist.test.next_batch(256)
-	acc = sess.run(network.accuracy, 
+	acc = sess.run(network.weight_accuracy, 
 				feed_dict={network.train_input: test_input, network.train_label: test_label, network.train_weights: 1, network.exploration: 0})
 	print("End of Meta Iter " + str(meta_step) + " Validation Accuracy= " +  "{:.5f}".format(acc))
 	
