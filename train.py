@@ -2,6 +2,7 @@ import tensorflow as tf
 from GeneralizedConv import GeneralizedConvNetwork
 from utils import *
 from DataSet import DataSet
+import random
 
 # Performs DARTS Bilevel optimization
 class DARTSAlgorithm(object):
@@ -24,7 +25,10 @@ class DARTSAlgorithm(object):
 	# One iteration of training hyper parameters
 	def train_hypers(self):
 		train_input, train_label = self.dataset.batch("train", self.config["train_batch_size"])
-		test_input, test_label = self.dataset.batch("test", self.config["train_batch_size"])
+		a = "train"
+		if random.random()<0.1:
+			a = "test"
+		test_input, test_label = self.dataset.batch(a, self.config["train_batch_size"])
 
 		opt = self.sess.run([self.network.hyper_update],feed_dict={
 			self.network.train_input: train_input,
@@ -50,10 +54,11 @@ class DARTSAlgorithm(object):
 			loss, acc = self.accuracy("train")
 			print("Post-Weight Update with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " +  "{:.5f}".format(acc))
 
-			print("SWITCHING TO HYPERPARAM OPT")
-			self.train_hypers()
-			loss, acc = self.accuracy("test")
-			print("Post-Hyper Update with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " +  "{:.5f}".format(acc))
+			if self.network.has_hypers:
+				print("SWITCHING TO HYPERPARAM OPT")
+				self.train_hypers()
+				loss, acc = self.accuracy("test")
+				print("Post-Hyper Update with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " +  "{:.5f}".format(acc))
 
 			loss, acc = self.accuracy("validation")
 			print("Validation Accuracy, Minibatch Loss= " + "{:.6f}".format(loss) + ", Accuracy= " +  "{:.5f}".format(acc))

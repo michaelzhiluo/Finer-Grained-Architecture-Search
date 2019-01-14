@@ -65,7 +65,8 @@ def DenseLayer(inputs,
 			activation_fn, 
 			norm_type, 
 			pool_config,
-			hyperparam_scope = "Hyperparameters"):
+			hyperparam_scope = "Hyperparameters",
+			reuse = True):
 	'''
 	DenseLayer takes any image, converts it to [batchsize, image_size]. Image size is all the image dimensions multiplied together.
 	For example, a 100 10x10x3 standard images will reduce [100, 10*10*3].
@@ -81,10 +82,10 @@ def DenseLayer(inputs,
 	#Weight reshaped to [num_filter, weights per filter]
 	weight_shape = weight.get_shape()
 	weight = tf.reshape(weight, [weight_shape[3], weight_shape[0]*weight_shape[1]*weight_shape[2]])
-	print(weight)
-	with tf.variable_scope(hyperparam_scope, reuse = tf.AUTO_REUSE):
-		alpha = tf.get_variable("alpha", shape=[output_dim[0]*output_dim[1], weight.get_shape()[1], inputs.get_shape()[1].value])
 
+	with tf.variable_scope(hyperparam_scope, reuse = reuse):
+		alpha = tf.get_variable("alpha" + str(output_dim[0]), shape=[output_dim[0]*output_dim[1], weight.get_shape()[1], inputs.get_shape()[1].value])
+		print(alpha)
 	#SoftMax Alpha
 	s_alpha = tf.nn.softmax(alpha, name="softmax_alpha")
 
