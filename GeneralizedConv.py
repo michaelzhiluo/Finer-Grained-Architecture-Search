@@ -3,23 +3,22 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from categorical import sample_gumbel, gumbel_softmax_sample, gumbel_softmax
 from tensorflow.examples.tutorials.mnist import input_data
-from Dataset import DataSet
 import seaborn as sns
-from utils import DenseLayer
+from utils import *
 from tensorflow.python.tools import inspect_checkpoint as chkp
 from IPython import embed
 from tensorflow.python import pywrap_tensorflow
 import os
 import logging
 import sys
-from tensorflow.examples.tutorials.mnist import input_data
 
 class GeneralizedConvNetwork(object):
-	def __init__(self):
-		self.batch_size = 256
-		self.weight_lr = 0.001
-		self.meta_lr = 0.001
-		self.beta = 0.005
+	def __init__(self, config):
+		self.config = config
+		self.batch_size = self.config["train_batch_size"]
+		self.weight_lr = self.config["weight_lr"]
+		self.meta_lr = self.config["meta_lr"]
+		self.beta = self.config["beta"]
 		# If just training hyperparameter (comment out weight training), meta_lr = 0.001, beta = 0.001 seems optimal, can get to 1.00 val accuracy!
 		self.build_model()
 		self.add_summaries()
@@ -29,8 +28,10 @@ class GeneralizedConvNetwork(object):
 	def build_model(self): 
 		#Placeholders 
 		self.train_input = tf.placeholder(tf.float32, [None, 784])
+		self.train_input_reshape = tf.reshape(self.train_input, [-1, 28, 28, 1])
 		self.train_label = tf.placeholder(tf.float32, [None, 10]) 
-		self.test_input = tf.placeholder(tf.float32, [None, 784]) 
+		self.test_input = tf.placeholder(tf.float32, [None, 784])
+		self.test_input_reshape = tf.reshape(self.test_input, [-1, 28, 28, 1]) 
 		self.test_label = tf.placeholder(tf.float32, [None, 10])
 
 		#Additional Placeholders
@@ -38,18 +39,10 @@ class GeneralizedConvNetwork(object):
 		self.exploration = tf.placeholder(tf.int32, name = "exploration")
 
 		#Weights
-		self.weights = {}
-		self.kernel_size = 5
-		self.num_filters = 32
 		with tf.variable_scope("Weights", reuse = tf.AUTO_REUSE):
-			self.weights['w0'] = tf.Variable(tf.random_normal([self.num_filters, self.kernel_size*self.kernel_size]))
-			self.weights['b0'] = tf.Variable(tf.random_normal([self.num_filters]))
-			self.weights['w1'] = tf.Variable(tf.random_normal([14*14*32, 1024]))
-			self.weights['b1'] = tf.Variable(tf.random_normal([1024]))
-			self.weights['w2'] = tf.Variable(tf.random_normal([1024, 10]))
-			self.weights['b2'] = tf.Variable(tf.random_normal([10]))
+			self.generate_weights(self.config["model"])
 
-		self.output = self.feed_forward(self.train_input, self.weights)
+		self.output = self.feed_forward(self.train_input_reshape, self.weights, self.config["model"])
 		self.train_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.output, labels=self.train_label))
 
 		
@@ -58,7 +51,7 @@ class GeneralizedConvNetwork(object):
 		look_ahead_weights = dict(zip(self.weights.keys(), [self.weights[key] - self.beta*self.gradients[key] for key in self.weights.keys()]))
 
 
-		self.output1 = self.feed_forward(self.test_input, look_ahead_weights)
+		self.output1 = self.feed_forward(self.test_input_reshape, look_ahead_weights, self.config["model"])
 		self.test_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.output1, labels=self.test_label))
 		
 
@@ -96,6 +89,30 @@ class GeneralizedConvNetwork(object):
 				self.prev_weight_ph += [tf.placeholder(tf.float32, var.get_shape())]
 				self.assign+=[tf.assign(var, self.prev_weight_ph[counter])]
 
+	def generate_weights(self, model_config):
+		self.weights= {}
+		counter =0
+		layer_list = model_config["layers"]
+		with tf.variable_scope("Weights", reuse = tf.AUTO_REUSE):
+			for i in range(0, len(layer_list)):
+				layer_dict = layer_list[i]
+				if layer_dict["type"]=="FC":
+					self.weights["w" + str(counter)] = tf.get_variable("w" + str(counter), 
+						[layer_dict["input"], layer_dict["output"]], 
+						initializer = layer_dict["weight_initializer"] if layer_dict["weight_initializer"] else tf.contrib.layers.xavier_initializer())
+					self.weights["b" + str(counter)] = tf.get_variable("b" + str(counter), 
+						[layer_dict["output"]], 
+						initializer = layer_dict["bias_initalizer"] if layer_dict["bias_initalizer"] else tf.zeros_initializer())
+					counter+=1
+				elif layer_dict["type"]=="Conv" or layer_dict["type"]=="Dense":
+					self.weights["w" + str(counter)] = tf.get_variable("w" + str(counter), 
+						[layer_dict["filter_height"], layer_dict["filter_width"], layer_dict["in_channels"], layer_dict["out_channels"]], 
+						initializer = layer_dict["weight_initializer"] if layer_dict["weight_initializer"] else tf.contrib.layers.xavier_initializer_conv2d())
+					self.weights["b" + str(counter)] = tf.get_variable("b" + str(counter), 
+						[layer_dict["out_channels"]], 
+						initializer = layer_dict["bias_initalizer"] if layer_dict["bias_initalizer"] else tf.zeros_initializer())
+					counter+=1
+
 	def add_summaries(self):
 		with tf.name_scope('Weight-Training'):
 			self.weight_loss_summ = tf.summary.scalar('Weight-Train Loss', self.train_loss)
@@ -107,102 +124,28 @@ class GeneralizedConvNetwork(object):
 			self.hyper_acc_summ = tf.summary.scalar('Hyper Accuracy', self.hyper_accuracy)
 			self.hyper_merged = tf.summary.merge([self.hyper_loss_summ, self.hyper_acc_summ])
 	
-	def feed_forward(self, inp, weights):
-		self.layer1 =  tf.reshape(DenseLayer(inp, 784, weights['w0'], weights['b0'], self.train_weights, self.exploration), [self.batch_size, 28, 28, self.num_filters])
-		self.pool1 = tf.reshape(tf.nn.max_pool(self.layer1, ksize = [1,2,2,1], strides = [1,2,2,1], padding = 'SAME'), [-1, 14*14*self.num_filters])
+	def feed_forward(self, inp, weights, model_config):
+		layer_list = model_config["layers"]
+		counter =0
+		output = inp
+		print(output)
+		for i in range(0, len(layer_list)):
+			layer_dict = layer_list[i]
+			
+			activation_fn = get_activation_function(layer_dict["activation"]) if "activation" in layer_dict else None 
+			norm_type = layer_dict["norm"] if "norm" in layer_dict else None		
 
-		self.layer2 = tf.nn.relu(tf.add(tf.matmul(self.pool1, weights['w1']), weights['b1']))
+			if layer_dict["type"]=="FC":
+				output = FCLayer(output, weights["w"+str(counter)], weights["b"+str(counter)], activation_fn, norm_type)
+				counter+=1
+			elif layer_dict["type"]=="Conv":
+				pool_config = layer_dict["pool"] if "pool" in layer_dict else None
+				output = ConvLayer(output, weights["w"+str(counter)], weights["b"+str(counter)], layer_dict["stride"], activation_fn, norm_type, pool_config)
+				counter+=1
+			elif layer_dict["type"]=="Dense":
+				pool_config = layer_dict["pool"] if "pool" in layer_dict else None
+				output = DenseLayer(output, layer_dict["output_dim"] , weights["w"+str(counter)], weights["b"+str(counter)], self.train_weights, self.exploration, activation_fn, norm_type, pool_config)
+				counter+=1
 
-		self.layer3 = tf.add(tf.matmul(self.layer2, weights['w2']), weights['b2'])
-
-		return self.layer3
-
-mnist = input_data.read_data_sets("/data/mluo/tmp/data/", one_hot=True)
-sess = tf.Session()
-
-network = GeneralizedConvNetwork()
-init = tf.global_variables_initializer()
-sess.run(init)
-tf_config = tf.ConfigProto(inter_op_parallelism_threads=1, intra_op_parallelism_threads=1)
-tf_config.gpu_options.allow_growth = True
-train_writer = tf.summary.FileWriter('/data/mluo/tensorboard',
-									  sess.graph)
-
-meta_iterations = 100000
-meta_step =0
-
-reader = pywrap_tensorflow.NewCheckpointReader("../model/model.ckpt")
-var_to_shape_map = reader.get_variable_to_shape_map()
-
-restored_weights = []
-
-'''
-for key in var_to_shape_map:
-	print("Saved/Restored Tensor_name: ", key)
-	temp = reader.get_tensor(key)
-	if(temp.shape==(5,5,1,32)):
-		temp = temp.reshape((32, 25))
-	restored_weights.append(temp)
-
-for i in tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='Weights'):
-		if "Adam" not in i.name:
-			print(i)
-			for j in restored_weights:
-					if i.shape==j.shape:
-						print(i.shape)
-						sess.run(tf.assign(i, tf.convert_to_tensor(j)))
-						assert np.array_equal(sess.run(i), j)
-print("Restored Weights from trained Conv Network")
-'''
-
-while meta_step <meta_iterations:
-
-	print("----------------------------META-ITERATION " + str(meta_step) + "----------------------------")
-	#sess.run(network.opt_init)
-	
-	print("SWITCHING TO WEIGHT OPT")
-	weight_step = 0
-	while(weight_step<1):
-		train_input, train_label = mnist.train.next_batch(256)
-		opt = sess.run(network.weight_update, feed_dict={network.train_input: train_input, network.train_label: train_label, network.train_weights: 1, network.exploration: 0})
-
-		if(weight_step%1==0):
-			m, loss, acc = sess.run([network.weight_merged,network.train_loss, network.weight_accuracy], feed_dict={network.train_input: train_input, network.train_label: train_label, network.train_weights: 1, network.exploration: 0})
-			print("Weight Iter " + str(weight_step) + " with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " +  "{:.5f}".format(acc))
-			train_writer.add_summary(m, meta_step)
-		weight_step+=1
-	
-	print("SWITCHING TO HYPERPARAM OPT")
-	hyper_step =0
-	while(hyper_step<1):
-		train_input, train_label = mnist.train.next_batch(256)
-		test_input, test_label = mnist.test.next_batch(256)
-
-		opt = sess.run([network.hyper_update], feed_dict={
-			network.train_input: train_input,
-			network.train_label: train_label,
-			network.test_input: test_input,
-			network.test_label: test_label,
-			network.exploration: 0,
-			network.train_weights: 0
-			})
-		if(hyper_step%1==0):
-			m, loss, acc = sess.run([network.hyper_merged, network.test_loss, network.hyper_accuracy],
-				feed_dict={
-			network.train_input: train_input,
-			network.train_label: train_label,
-			network.test_input: test_input,
-			network.test_label: test_label,
-			network.exploration: 0,
-			network.train_weights: 0
-			})
-			print("Hyper Iter " + str(hyper_step) + " with normal batch, Minibatch Loss= " + "{:.6f}".format(loss) + ", Hyperparameter Training Accuracy= " +  "{:.5f}".format(acc))
-			train_writer.add_summary(m, meta_step)
-		hyper_step+=1
-	
-	test_input, test_label = mnist.test.next_batch(256)
-	acc = sess.run(network.weight_accuracy, 
-				feed_dict={network.train_input: test_input, network.train_label: test_label, network.train_weights: 1, network.exploration: 0})
-	print("End of Meta Iter " + str(meta_step) + " Validation Accuracy= " +  "{:.5f}".format(acc))
-	
-	meta_step+=1
+			print(output)
+		return output
