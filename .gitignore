@@ -242,3 +242,11 @@ TSWLatexianTemp*
 
 # generated if using elsarticle.cls
 *.spl
+
+# Python
+*.pyc
+
+# Project-specific
+data/*
+model/*
+tensorboard/*
